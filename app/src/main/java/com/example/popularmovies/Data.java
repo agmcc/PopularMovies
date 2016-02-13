@@ -19,6 +19,5 @@ final class Data {
     };
 
     private Data() {
-        // No instances.
     }
 }
