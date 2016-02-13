@@ -4,28 +4,15 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-
 import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import static android.widget.ImageView.ScaleType.CENTER_CROP;
 
 public class ImageAdapter extends BaseAdapter {
 
     private Context mContext;
 
-    private final List<String> urls = new ArrayList<String>();
-
     public ImageAdapter(Context c) {
         mContext = c;
-
-        Collections.addAll(urls, Data.URLS);
-        ArrayList<String> copy = new ArrayList<String>(urls);
-        urls.addAll(copy);
-        urls.addAll(copy);
     }
 
     @Override
@@ -48,12 +35,12 @@ public class ImageAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return urls.size();
+        return MovieData.poster_thumbnail.length;
     }
 
     @Override
     public String getItem(int position) {
-        return urls.get(position);
+        return MovieData.poster_thumbnail[position];
     }
 
     @Override

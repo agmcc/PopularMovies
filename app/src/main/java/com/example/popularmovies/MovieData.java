@@ -1,9 +1,12 @@
 package com.example.popularmovies;
 
-import java.util.ArrayList;
-
 public class MovieData {
 
-    static public ArrayList<String> poster_thumbnail = new ArrayList<String>();
+    static public String[] poster_thumbnail = new String[0];
+    static public String[] poster_full_size= new String[0];
+    static public String[] overview = new String[0];
+    static public String[] date = new String[0];
+    static public String[] title = new String[0];
+    static public String[] vote = new String[0];
 
 }

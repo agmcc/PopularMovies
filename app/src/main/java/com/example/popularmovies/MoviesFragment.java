@@ -1,6 +1,5 @@
 package com.example.popularmovies;
 
-
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,11 +9,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,10 +36,6 @@ public class MoviesFragment extends Fragment {
         getMovieData();
     }
 
-    public void DoStuff(){
-        Log.v( LOG_TAG,"Doing stuff on ui thread");
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -53,42 +46,16 @@ public class MoviesFragment extends Fragment {
     }
 
     private void getMovieData() {
-        //task should do 1 thing - return info from query
-        // so feed different queries e.g. sort by popularity
         FetchMoviesTask task = new FetchMoviesTask();
         task.execute();
     }
 
-    private class FetchMoviesTask extends AsyncTask<String, Void, String[]> { //params, progress, result
+    private class FetchMoviesTask extends AsyncTask<String, Void, String[][]> {
 
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
         @Override
-        protected String[] doInBackground(String... params) {
-            /*
-            query for most popular + highest rated (make popular default)
-            Grid: Movie poster thumbnail
-            Details: title, release date, poster, vote, plot
-            //vote_average.desc
-            currently returns 20 movies (1 page)
-
-            //poster path is relative
-            \/inVq3FRqcYIRl2la8iZikYYxFNR.jpg
-            Append: Base url:  http://image.tmdb.org/t/p/
-            Size "w92", "w154", "w185", "w342", "w500", "w780", or "original". try w185
-            path
-
-            "poster_path" (see above- may need 2 sizes (thumbnail and full res)
-            "overview"
-            "release_date"
-            "title" n.b. also "original_title"
-            "vote_average"
-
-            start with just thumbnails
-
-
-             */
-
+        protected String[][] doInBackground(String... params) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             String moviesJsonStr;
@@ -107,7 +74,7 @@ public class MoviesFragment extends Fragment {
                         .build();
 
                 URL url = new URL(builtUri.toString());
-                Log.v(LOG_TAG, "Built URI " + builtUri.toString());
+                //Log.v(LOG_TAG, "Built URI " + builtUri.toString());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -133,7 +100,7 @@ public class MoviesFragment extends Fragment {
 
                 moviesJsonStr = buffer.toString();
 
-                Log.v(LOG_TAG, "Movies JSON String: " + moviesJsonStr);
+                //Log.v(LOG_TAG, "Movies JSON String: " + moviesJsonStr);
 
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
@@ -159,41 +126,68 @@ public class MoviesFragment extends Fragment {
             return null;
         }
 
-        private String[] getMovieDataFromJSON(String movieDataJsonStr)
+        private String[][] getMovieDataFromJSON(String movieDataJsonStr)
                 throws JSONException {
 
             final String MOVIE_DB_RESULTS = "results";
-            final String MOVIE_DB_TITLE  = "title";
+            final String MOVIE_DB_POSTER = "poster_path";
+            final String MOVIE_DB_OVERVIEW = "overview";
+            final String MOVIE_DB_DATE = "release_date";
+            final String MOVIE_DB_TITLE = "title";
+            final String MOVIE_DB_VOTE = "vote_average";
+
+            final String POSTER_BASE_URL = "https://image.tmdb.org/t/p";
+            final String POSTER_THUMB_SIZE = "w185";
+            final String POSTER_FULL_SIZE = "w780"; //could be "original"
 
             JSONObject movieDataJson = new JSONObject(movieDataJsonStr);
             JSONArray movieDataArray = movieDataJson.getJSONArray(MOVIE_DB_RESULTS);
 
             int numMovies = movieDataArray.length();
 
-            String[] resultStrs = new String[numMovies];
+            String[][] results = new String[6][numMovies];
 
-            //start with just thumbnail
-            for(int i = 0; i < numMovies; i++){
+            for (int i = 0; i < numMovies; i++) {
                 JSONObject movieObject = movieDataArray.getJSONObject(i);
-                //temp
-                String title = movieObject.getString(MOVIE_DB_TITLE);
 
-                resultStrs[i] = title;
+                Uri poster_thumb = Uri.parse(POSTER_BASE_URL).buildUpon()
+                        .appendEncodedPath(POSTER_THUMB_SIZE)
+                        .appendEncodedPath(
+                                movieObject.getString(MOVIE_DB_POSTER))
+                        .build();
+
+                Uri poster_full = Uri.parse(POSTER_BASE_URL).buildUpon()
+                        .appendEncodedPath(POSTER_FULL_SIZE)
+                        .appendEncodedPath(
+                                movieObject.getString(MOVIE_DB_POSTER))
+                        .build();
+
+                String overview = movieObject.getString(MOVIE_DB_OVERVIEW);
+                String date = movieObject.getString(MOVIE_DB_DATE);
+                String title = movieObject.getString(MOVIE_DB_TITLE);
+                String vote = movieObject.getString(MOVIE_DB_VOTE);
+
+                results[0][i] = poster_thumb.toString();
+                results[1][i] = poster_full.toString();
+                results[2][i] = overview;
+                results[3][i] = date;
+                results[4][i] = title;
+                results[5][i] = vote;
             }
 
-            return resultStrs;
+            return results;
         }
 
         @Override
-        protected void onPostExecute(String[] results) {
+        protected void onPostExecute(String[][] results) {
             super.onPostExecute(results);
-            Log.v(LOG_TAG, "Printing movies titles\n");
-            for(String result : results){
-                Log.v(LOG_TAG, result);
-            }
-            //could have array of string array / array list strign array
-            //then for each element add to correct list in movie data
-            //will stat with just string[] and do moviethumbs
+
+            MovieData.poster_thumbnail = results[0];
+            MovieData.poster_full_size = results[1];
+            MovieData.overview = results[2];
+            MovieData.date = results[3];
+            MovieData.title = results[4];
+            MovieData.vote = results[5];
         }
     }
 
