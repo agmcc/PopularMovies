@@ -11,7 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -32,18 +34,22 @@ public class MoviesFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        getMovieData();
+    }
+
+    public void DoStuff(){
+        Log.v( LOG_TAG,"Doing stuff on ui thread");
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
         GridView gridView = (GridView) rootView.findViewById(R.id.gridview);
         gridView.setAdapter(new ImageAdapter(getContext()));
         return rootView;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        getMovieData();
     }
 
     private void getMovieData() {
@@ -64,6 +70,22 @@ public class MoviesFragment extends Fragment {
             Grid: Movie poster thumbnail
             Details: title, release date, poster, vote, plot
             //vote_average.desc
+            currently returns 20 movies (1 page)
+
+            //poster path is relative
+            \/inVq3FRqcYIRl2la8iZikYYxFNR.jpg
+            Append: Base url:  http://image.tmdb.org/t/p/
+            Size "w92", "w154", "w185", "w342", "w500", "w780", or "original". try w185
+            path
+
+            "poster_path" (see above- may need 2 sizes (thumbnail and full res)
+            "overview"
+            "release_date"
+            "title" n.b. also "original_title"
+            "vote_average"
+
+            start with just thumbnails
+
 
              */
 
@@ -137,16 +159,41 @@ public class MoviesFragment extends Fragment {
             return null;
         }
 
-        private String[] getMovieDataFromJSON(String moviesJsonStr)
+        private String[] getMovieDataFromJSON(String movieDataJsonStr)
                 throws JSONException {
 
-            return null;
+            final String MOVIE_DB_RESULTS = "results";
+            final String MOVIE_DB_TITLE  = "title";
+
+            JSONObject movieDataJson = new JSONObject(movieDataJsonStr);
+            JSONArray movieDataArray = movieDataJson.getJSONArray(MOVIE_DB_RESULTS);
+
+            int numMovies = movieDataArray.length();
+
+            String[] resultStrs = new String[numMovies];
+
+            //start with just thumbnail
+            for(int i = 0; i < numMovies; i++){
+                JSONObject movieObject = movieDataArray.getJSONObject(i);
+                //temp
+                String title = movieObject.getString(MOVIE_DB_TITLE);
+
+                resultStrs[i] = title;
+            }
+
+            return resultStrs;
         }
 
         @Override
-        protected void onPostExecute(String[] result) {
-            super.onPostExecute(result);
-            //verify result then call method on MoviesFragment to update
+        protected void onPostExecute(String[] results) {
+            super.onPostExecute(results);
+            Log.v(LOG_TAG, "Printing movies titles\n");
+            for(String result : results){
+                Log.v(LOG_TAG, result);
+            }
+            //could have array of string array / array list strign array
+            //then for each element add to correct list in movie data
+            //will stat with just string[] and do moviethumbs
         }
     }
 
