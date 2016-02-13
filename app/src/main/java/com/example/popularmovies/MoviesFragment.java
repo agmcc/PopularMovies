@@ -9,9 +9,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,23 +28,23 @@ public class MoviesFragment extends Fragment {
     private final String POPULARITY = "popularity.desc";
     private final String RATING = "vote_average.desc";
     protected String sortMode = POPULARITY;
+    protected GridView gridView;
 
     public MoviesFragment() {
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        getMovieData();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
-        GridView gridView = (GridView) rootView.findViewById(R.id.gridview);
-        gridView.setAdapter(new ImageAdapter(getContext()));
+        gridView = (GridView)rootView.findViewById(R.id.gridview);
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        getMovieData();
     }
 
     private void getMovieData() {
@@ -188,6 +190,8 @@ public class MoviesFragment extends Fragment {
             MovieData.date = results[3];
             MovieData.title = results[4];
             MovieData.vote = results[5];
+
+            gridView.setAdapter(new ImageAdapter(getContext()));
         }
     }
 
