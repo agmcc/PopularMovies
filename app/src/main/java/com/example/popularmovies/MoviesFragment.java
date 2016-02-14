@@ -4,16 +4,23 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.GridView;
-
+import android.widget.Spinner;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemSelectedListener;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +28,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class MoviesFragment extends Fragment {
+public class MoviesFragment extends Fragment implements OnItemSelectedListener{
 
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
@@ -34,10 +41,68 @@ public class MoviesFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_layout, menu);
+        MenuItem item = menu.findItem(R.id.spinner);
+        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                getContext(),
+                R.array.spinner_choices,
+                android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
+    }
+
+    public void onItemSelected(AdapterView<?> parent, View view,
+                               int pos, long id) {
+        String choice = parent.getItemAtPosition(pos).toString();
+        if (choice.equals(getString(R.string.sort_popularity))) {
+            sortMode = POPULARITY;
+        } else if (choice.equals(getString(R.string.sort_rating))) {
+            sortMode = RATING;
+        }
+        Toast.makeText(getContext(), "Sort by " + choice, Toast.LENGTH_SHORT).show();
+        getMovieData();
+    }
+
+    public void onNothingSelected(AdapterView<?> parent) {
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        /*
+        int id = item.getItemId();
+        String sortChoice = null;
+        if (id == R.id.sort_popularity) {
+            sortChoice = POPULARITY;
+        }
+        if (id == R.id.sort_rating) {
+            sortChoice = RATING;
+        }
+        if (sortChoice != null && !sortChoice.equals(sortMode)) {
+            sortMode = sortChoice;
+            getMovieData();
+            Toast.makeText(getContext(), "Sorting by " + item.toString(), Toast.LENGTH_SHORT).show();
+        }else if(sortChoice != null) {
+            Toast.makeText(getContext(), "Nothing to Update", Toast.LENGTH_SHORT).show();
+        }
+        */
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
-        gridView = (GridView)rootView.findViewById(R.id.gridview);
+        gridView = (GridView) rootView.findViewById(R.id.gridview);
         return rootView;
     }
 
