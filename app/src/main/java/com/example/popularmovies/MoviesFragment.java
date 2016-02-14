@@ -87,8 +87,8 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener {
         gridView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent detailIntent = new Intent(getActivity(), DetailActivity.class);
-                //put info in here? or just refer to MovieData
+                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
+                        .putExtra(Intent.EXTRA_TEXT, position);
                 startActivity(detailIntent);
             }
         });
