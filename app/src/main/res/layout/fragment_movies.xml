@@ -17,5 +17,4 @@
         android:horizontalSpacing="@dimen/grid_spacing"
         android:stretchMode="columnWidth">
     </GridView>
-
 </FrameLayout>
