@@ -3,5 +3,6 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="grid_margin">0dp</dimen>
-    <dimen name="grid_spacing">5dp</dimen>
+    <dimen name="grid_spacing">4dp</dimen>
+    <dimen name="grid_col_width">100dp</dimen>
 </resources>

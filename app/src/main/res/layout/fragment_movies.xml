@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:id="@+id/gridview"
         android:layout_gravity="center"
-        android:columnWidth="100dp"
+        android:columnWidth="@dimen/grid_col_width"
         android:numColumns="auto_fit"
         android:verticalSpacing="@dimen/grid_spacing"
         android:horizontalSpacing="@dimen/grid_spacing"

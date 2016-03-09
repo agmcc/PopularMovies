@@ -7,7 +7,7 @@ import android.widget.BaseAdapter;
 
 import com.squareup.picasso.Picasso;
 
-import static android.widget.ImageView.ScaleType.CENTER_CROP;
+import static android.widget.ImageView.ScaleType.CENTER_INSIDE;
 
 public class ImageAdapter extends BaseAdapter {
 
@@ -22,14 +22,14 @@ public class ImageAdapter extends BaseAdapter {
         SquaredImageView view = (SquaredImageView) convertView;
         if (view == null) {
             view = new SquaredImageView(mContext);
-            view.setScaleType(CENTER_CROP);
+            view.setScaleType(CENTER_INSIDE);//todo change back to centrecrop for release
         }
         String url = getItem(position);
 
-        Picasso.with(mContext)
-                .load(url)
+        Picasso mPicasso = Picasso.with(mContext);
+        mPicasso.setIndicatorsEnabled(true);
+        mPicasso.load(url)
                 .placeholder(R.drawable.black_square)
-                //.fit() //fit squishes down to square- not sure if better than just croping
                 .into(view);
 
         return view;

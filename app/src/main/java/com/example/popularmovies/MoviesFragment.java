@@ -193,7 +193,7 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener {
             final String MOVIE_DB_VOTE = "vote_average";
 
             final String POSTER_BASE_URL = "https://image.tmdb.org/t/p";
-            final String POSTER_THUMB_SIZE = "w185";
+            final String POSTER_THUMB_SIZE = "w92"; //todo revert w185
             final String POSTER_FULL_SIZE = "w780"; //could be "original"
 
             JSONObject movieDataJson = new JSONObject(movieDataJsonStr);
