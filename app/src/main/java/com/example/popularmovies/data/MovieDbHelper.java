@@ -27,13 +27,13 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 Columns.SUMMARY + " TEXT NOT NULL, " +
                 Columns.DATE + " INTEGER NOT NULL, " +
                 Columns.TITLE + " TEXT NOT NULL, " +
-                Columns.RATING + " REAL NOT NULL, " +
+                Columns.RATING + " REAL NOT NULL" +
 //                " FOREIGN KEY (" + Columns.TRAILERS_KEY + ") REFERENCES " +
 //                TrailersEntry.TABLE_NAME + " (" + TrailersEntry._ID + "), " +
 //                " FOREIGN KEY (" + Columns.REVIEWS_KEY + ") REFERENCES " +
 //                ReviewsEntry.TABLE_NAME + " (" + ReviewsEntry._ID + "), " +
-                Columns.TRAILER + " TEXT DEFAULT None, " +
-                Columns.REVIEW + " TEXT DEFAULT None " +
+//                Columns.TRAILER + " TEXT DEFAULT None, " +
+//                Columns.REVIEW + " TEXT DEFAULT None " +
                 ");";
 
         final String SQL_CREATE_POPULARITY_TABLE = "CREATE TABLE " + PopularityEntry.TABLE_NAME + " (" +

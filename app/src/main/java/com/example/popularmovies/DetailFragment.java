@@ -32,8 +32,6 @@ public class DetailFragment extends Fragment {
         TextView rating = (TextView) (rootView.findViewById(R.id.rating_textview));
         TextView summary = (TextView) (rootView.findViewById(R.id.summary_textview));
 
-//        SQLiteDatabase db = new MovieDbHelper(getContext()).getReadableDatabase();
-
         final String[] projection = {
                 Columns.POSTER_FULL,
                 Columns.TITLE,
@@ -48,18 +46,16 @@ public class DetailFragment extends Fragment {
         final int ratingInd = 3;
         final int summaryInd = 4;
 
-        Uri uri = MovieContract.PopularityEntry.CONTENT_URI.buildUpon()
-                .appendPath(Integer.toString(gridId + 1))
-                .build();
+        Uri uri = MovieContract.PopularityEntry.buildPopularityUri(gridId + 1);
 
         Cursor cursor = getContext().getContentResolver().query(
                 uri,
                 projection,
                 null, null, null);
 
-        if(cursor != null){
+        if (cursor != null) {
             try {
-                if(cursor.moveToFirst()) {
+                if (cursor.moveToFirst()) {
                     Picasso.with(getContext())
                             .load(cursor.getString(posterInd))
                             .into(imageView);
@@ -69,36 +65,10 @@ public class DetailFragment extends Fragment {
                     rating.setText(cursor.getString(ratingInd));
                     summary.setText(cursor.getString(summaryInd));
                 }
-            }finally {
+            } finally {
                 cursor.close();
             }
         }
-
-//        Cursor cursor = db.query(
-//                MovieContract.PopularityEntry.TABLE_NAME,
-//                projection,
-//                null,
-//                null,
-//                null,
-//                null,
-//                null
-//        );
-//
-//        if (cursor != null) {
-//            if (cursor.move(gridId + 1)) {
-//                Picasso.with(getContext())
-//                        .load(cursor.getString(posterInd))
-//                        .into(imageView);
-//
-//                title.setText(cursor.getString(titleInd));
-//                date.setText(cursor.getString(dateInd));
-//                rating.setText(cursor.getString(ratingInd));
-//                summary.setText(cursor.getString(summaryInd));
-//            }
-//            cursor.close();
-//        }
-//        db.close();
-
         return rootView;
     }
 

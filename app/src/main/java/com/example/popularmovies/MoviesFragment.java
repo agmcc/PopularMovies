@@ -208,13 +208,6 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener {
 
             int numMovies = movieDataArray.length();
 
-//            SQLiteDatabase db = new MovieDbHelper(getContext()).getWritableDatabase();
-
-//            db.delete("SQLITE_SEQUENCE", "NAME = ?", new String[]{MovieContract.PopularityEntry.TABLE_NAME});
-//            db.delete("SQLITE_SEQUENCE", "NAME = ?", new String[]{MovieContract.RatingEntry.TABLE_NAME});
-//            db.delete(MovieContract.PopularityEntry.TABLE_NAME, null, null);
-//            db.delete(MovieContract.RatingEntry.TABLE_NAME, null, null);
-
             ContentResolver resolver = getContext().getContentResolver();
             resolver.delete(MovieContract.PopularityEntry.CONTENT_URI, null, null);
             resolver.delete(MovieContract.RatingEntry.CONTENT_URI, null, null);
@@ -236,48 +229,29 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener {
                         .build()
                         .toString();
 
-                String overview = movieObject.getString(MOVIE_DB_OVERVIEW);
+                String summary = movieObject.getString(MOVIE_DB_OVERVIEW);
                 String date = movieObject.getString(MOVIE_DB_DATE);
                 String title = movieObject.getString(MOVIE_DB_TITLE);
-                String vote = movieObject.getString(MOVIE_DB_VOTE);
+                String rating = movieObject.getString(MOVIE_DB_VOTE);
                 //todo parse trailer and review- will do separatey
 
                 //todo add to different db based on spinner (popular, rating)
                 //todo add first trailer and review (test)
-                //todo fix inconsistent names e.g. vote, summary etc.
-
-//                public static final String POSTER_THUMB = "poster_thumb";
-//                public static final String POSTER_FULL = "poster_full";
-//                public static final String SUMMARY = "summary";
-//                public static final String DATE = "date";
-//                public static final String TITLE = "title";
-//                public static final String RATING = "rating";
-//                public static final String TRAILER = "trailer";
-//                public static final String REVIEW = "review";
 
                 ContentValues movieValues = new ContentValues();
 
                 movieValues.put(Columns.POSTER_THUMB, poster_thumb);
                 movieValues.put(Columns.POSTER_FULL, poster_full);
-                movieValues.put(Columns.SUMMARY, overview);
+                movieValues.put(Columns.SUMMARY, summary);
                 movieValues.put(Columns.DATE, date);
                 movieValues.put(Columns.TITLE, title);
-                movieValues.put(Columns.RATING, vote);
+                movieValues.put(Columns.RATING, rating);
 //                movieValues.put(Columns.TRAILER, trailer);
                 //movieValues.put(Columns.REVIEW, review);
 
-                //temp only use underlying sqlite NOT Content provider
-                //N.B. Currently using Popularity table to store both popular + rating (overwriting)
-//                db.insert(
-//                        MovieContract.PopularityEntry.TABLE_NAME,
-//                        null,
-//                        movieValues
-//                );
                 cVVector.add(movieValues);
             }
-//            db.close();
 
-            //write to db
             //n.b. this is where would decide which db (rating, popular) to put cvs into
             if (cVVector.size() > 0) {
                 ContentValues[] cvArray = new ContentValues[cVVector.size()];

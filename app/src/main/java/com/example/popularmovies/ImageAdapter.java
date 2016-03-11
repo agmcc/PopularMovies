@@ -17,32 +17,14 @@ public class ImageAdapter extends BaseAdapter {
 
     public ImageAdapter(Context c) {
         mContext = c;
-//        SQLiteDatabase db = new MovieDbHelper(mContext).getReadableDatabase();
-//
-//        Cursor cursor = db.query(
-//                MovieContract.PopularityEntry.TABLE_NAME,
-//                new String[]{MovieContract.Columns.POSTER_THUMB},
-//                null, null, null, null, null
-//        );
-//
-//        if (cursor != null) {
-//            thumbs = new String[cursor.getCount()];
-//            if (cursor.moveToFirst()) {
-//                do {
-//                    thumbs[cursor.getPosition()] = cursor.getString(0);
-//                } while (cursor.moveToNext());
-//            }
-//            cursor.close();
-//        }
-//        db.close();
+
         Cursor cursor = mContext.getContentResolver().query(
                 MovieContract.PopularityEntry.CONTENT_URI,
                 new String[]{MovieContract.Columns.POSTER_THUMB},
                 null, null, null);
 
-        thumbs = new String[cursor.getCount()];
-
         if (cursor != null) {
+            thumbs = new String[cursor.getCount()];
             try {
                 while (cursor.moveToNext()) {
                     thumbs[cursor.getPosition()] = cursor.getString(0);

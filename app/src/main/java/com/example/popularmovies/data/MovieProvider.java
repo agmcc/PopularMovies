@@ -31,8 +31,8 @@ public class MovieProvider extends ContentProvider {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = MovieContract.CONTENT_AUTHORITY;
 
-        matcher.addURI(authority, MovieContract.PATH_POPULARITY, POPULARITY);//table
-        matcher.addURI(authority, MovieContract.PATH_POPULARITY + "/#", POPULARITY_WITH_ID);//row
+        matcher.addURI(authority, MovieContract.PATH_POPULARITY, POPULARITY);
+        matcher.addURI(authority, MovieContract.PATH_POPULARITY + "/#", POPULARITY_WITH_ID);
         matcher.addURI(authority, MovieContract.PATH_RATING, RATING);
         matcher.addURI(authority, MovieContract.PATH_RATING + "/#", RATING_WITH_ID);
         matcher.addURI(authority, MovieContract.PATH_FAVOURITES, FAVOURITES);
@@ -193,8 +193,6 @@ public class MovieProvider extends ContentProvider {
             case POPULARITY:
                 numDeleted = db.delete(
                         PopularityEntry.TABLE_NAME, selection, selectionArgs);
-//                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" +
-//                        PopularityEntry.TABLE_NAME + "'");
                 db.delete("SQLITE_SEQUENCE",
                         "NAME = ?",
                         new String[]{PopularityEntry.TABLE_NAME});
