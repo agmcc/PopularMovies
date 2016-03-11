@@ -2,11 +2,14 @@ package com.example.popularmovies;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,7 +19,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
@@ -38,13 +40,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Vector;
 
-public class MoviesFragment extends Fragment implements OnItemSelectedListener {
+public class MoviesFragment extends Fragment implements OnItemSelectedListener,
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
+
     private final String POPULARITY = "popularity.desc";
     private final String RATING = "vote_average.desc";
     protected String sortMode = POPULARITY;
     protected GridView gridView;
+    private static final int MOVIE_LOADER = 0;
+    private MovieAdapter mAdapter;
 
     public MoviesFragment() {
     }
@@ -89,29 +95,59 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
+        mAdapter = new MovieAdapter(getActivity(), null, 0);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
-        gridView.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT, position);
-                startActivity(detailIntent);
-            }
-        });
+        gridView.setAdapter(mAdapter);
+
+//        gridView.setOnItemClickListener(new OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
+//                        .putExtra(Intent.EXTRA_TEXT, position);
+//                startActivity(detailIntent);
+//            }
+//        });
         return rootView;
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
     public void onStart() {
-        Log.v(LOG_TAG, "onStart()");
         super.onStart();
         getMovieData();
     }
 
     private void getMovieData() {
-        Log.v(LOG_TAG, "getMovieData");
         FetchMoviesTask task = new FetchMoviesTask();
         task.execute();
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        final String[] projection = {
+                MovieContract.PopularityEntry.TABLE_NAME + "." + MovieContract.PopularityEntry._ID,
+                Columns.POSTER_THUMB
+        };
+
+        return new CursorLoader(getActivity(),
+                MovieContract.PopularityEntry.CONTENT_URI,
+                projection,
+                null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        mAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
     }
 
     private class FetchMoviesTask extends AsyncTask<String, Void, Void> {
@@ -260,10 +296,10 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener {
             }
         }
 
-        @Override
-        protected void onPostExecute(Void v) {
-            gridView.setAdapter(new ImageAdapter(getContext()));
-        }
+//        @Override
+//        protected void onPostExecute(Void v) {
+//            gridView.setAdapter(new ImageAdapter(getContext()));
+//        }
     }
 
 }
