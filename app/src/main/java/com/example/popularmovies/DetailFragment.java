@@ -2,7 +2,7 @@ package com.example.popularmovies;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -13,7 +13,6 @@ import android.widget.TextView;
 
 import com.example.popularmovies.data.MovieContract;
 import com.example.popularmovies.data.MovieContract.Columns;
-import com.example.popularmovies.data.MovieDbHelper;
 import com.squareup.picasso.Picasso;
 
 public class DetailFragment extends Fragment {
@@ -33,7 +32,7 @@ public class DetailFragment extends Fragment {
         TextView rating = (TextView) (rootView.findViewById(R.id.rating_textview));
         TextView summary = (TextView) (rootView.findViewById(R.id.summary_textview));
 
-        SQLiteDatabase db = new MovieDbHelper(getContext()).getReadableDatabase();
+//        SQLiteDatabase db = new MovieDbHelper(getContext()).getReadableDatabase();
 
         final String[] projection = {
                 Columns.POSTER_FULL,
@@ -41,7 +40,6 @@ public class DetailFragment extends Fragment {
                 Columns.DATE,
                 Columns.RATING,
                 Columns.SUMMARY,
-                MovieContract.PopularityEntry._ID
         };
 
         final int posterInd = 0;
@@ -50,40 +48,56 @@ public class DetailFragment extends Fragment {
         final int ratingInd = 3;
         final int summaryInd = 4;
 
-        String selection = "MovieContract.PopularityEntry._ID == " + gridId + 1;
+        Uri uri = MovieContract.PopularityEntry.CONTENT_URI.buildUpon()
+                .appendPath(Integer.toString(gridId + 1))
+                .build();
 
-        Cursor cursor = db.query(
-                MovieContract.PopularityEntry.TABLE_NAME,
+        Cursor cursor = getContext().getContentResolver().query(
+                uri,
                 projection,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
+                null, null, null);
 
-        if (cursor != null) {
-            if (cursor.move(gridId + 1)) {
-                Picasso.with(getContext())
-                        .load(cursor.getString(posterInd))
-                        .into(imageView);
+        if(cursor != null){
+            try {
+                if(cursor.moveToFirst()) {
+                    Picasso.with(getContext())
+                            .load(cursor.getString(posterInd))
+                            .into(imageView);
 
-                title.setText(cursor.getString(titleInd));
-                date.setText(cursor.getString(dateInd));
-                rating.setText(cursor.getString(ratingInd));
-                summary.setText(cursor.getString(summaryInd));
+                    title.setText(cursor.getString(titleInd));
+                    date.setText(cursor.getString(dateInd));
+                    rating.setText(cursor.getString(ratingInd));
+                    summary.setText(cursor.getString(summaryInd));
+                }
+            }finally {
+                cursor.close();
             }
-            cursor.close();
         }
-        db.close();
 
-//        Picasso.with(getContext())
-//                .load(MovieData.poster_full_size[gridId])
-//                .into(imageView);
-//        title.setText(MovieData.title[gridId]);
-//        date.setText(MovieData.date[gridId]);
-//        rating.setText(MovieData.vote[gridId]);
-//        summary.setText(MovieData.overview[gridId]);
+//        Cursor cursor = db.query(
+//                MovieContract.PopularityEntry.TABLE_NAME,
+//                projection,
+//                null,
+//                null,
+//                null,
+//                null,
+//                null
+//        );
+//
+//        if (cursor != null) {
+//            if (cursor.move(gridId + 1)) {
+//                Picasso.with(getContext())
+//                        .load(cursor.getString(posterInd))
+//                        .into(imageView);
+//
+//                title.setText(cursor.getString(titleInd));
+//                date.setText(cursor.getString(dateInd));
+//                rating.setText(cursor.getString(ratingInd));
+//                summary.setText(cursor.getString(summaryInd));
+//            }
+//            cursor.close();
+//        }
+//        db.close();
 
         return rootView;
     }

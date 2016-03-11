@@ -12,25 +12,27 @@ import com.example.popularmovies.data.MovieContract.FavouritesEntry;
 import com.example.popularmovies.data.MovieContract.PopularityEntry;
 import com.example.popularmovies.data.MovieContract.RatingEntry;
 
-
 public class MovieProvider extends ContentProvider {
 
     private static final String LOG_TAG = MovieProvider.class.getSimpleName();
+
     private static final int POPULARITY = 100;
     private static final int POPULARITY_WITH_ID = 101;
     private static final int RATING = 200;
     private static final int RATING_WITH_ID = 201;
     private static final int FAVOURITES = 300;
     private static final int FAVOURITES_WITH_ID = 301;
+
     private static final UriMatcher sUriMatcher = buildUriMatcher();
+
     private MovieDbHelper mOpenHelper;
 
     private static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = MovieContract.CONTENT_AUTHORITY;
 
-        matcher.addURI(authority, MovieContract.PATH_POPULARITY, POPULARITY);
-        matcher.addURI(authority, MovieContract.PATH_POPULARITY + "/#", POPULARITY_WITH_ID);
+        matcher.addURI(authority, MovieContract.PATH_POPULARITY, POPULARITY);//table
+        matcher.addURI(authority, MovieContract.PATH_POPULARITY + "/#", POPULARITY_WITH_ID);//row
         matcher.addURI(authority, MovieContract.PATH_RATING, RATING);
         matcher.addURI(authority, MovieContract.PATH_RATING + "/#", RATING_WITH_ID);
         matcher.addURI(authority, MovieContract.PATH_FAVOURITES, FAVOURITES);
@@ -50,15 +52,15 @@ public class MovieProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case POPULARITY:
-                return PopularityEntry.CONTENT_TYPE;
+                return PopularityEntry.CONTENT_DIR_TYPE;
             case POPULARITY_WITH_ID:
                 return PopularityEntry.CONTENT_ITEM_TYPE;
             case RATING:
-                return RatingEntry.CONTENT_TYPE;
+                return RatingEntry.CONTENT_DIR_TYPE;
             case RATING_WITH_ID:
                 return RatingEntry.CONTENT_ITEM_TYPE;
             case FAVOURITES:
-                return FavouritesEntry.CONTENT_TYPE;
+                return FavouritesEntry.CONTENT_DIR_TYPE;
             case FAVOURITES_WITH_ID:
                 return FavouritesEntry.CONTENT_ITEM_TYPE;
             default:
@@ -68,11 +70,12 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         Cursor retCursor;
 
         switch (sUriMatcher.match(uri)) {
             case POPULARITY: {
-                retCursor = mOpenHelper.getReadableDatabase().query(
+                retCursor = db.query(
                         PopularityEntry.TABLE_NAME,
                         projection,
                         selection,
@@ -83,7 +86,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case POPULARITY_WITH_ID: {
-                retCursor = mOpenHelper.getReadableDatabase().query(
+                retCursor = db.query(
                         PopularityEntry.TABLE_NAME,
                         projection,
                         PopularityEntry._ID + " = ?",
@@ -94,7 +97,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case RATING: {
-                retCursor = mOpenHelper.getReadableDatabase().query(
+                retCursor = db.query(
                         RatingEntry.TABLE_NAME,
                         projection,
                         selection,
@@ -105,7 +108,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case RATING_WITH_ID: {
-                retCursor = mOpenHelper.getReadableDatabase().query(
+                retCursor = db.query(
                         RatingEntry.TABLE_NAME,
                         projection,
                         RatingEntry._ID + " = ?",
@@ -116,7 +119,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case FAVOURITES: {
-                retCursor = mOpenHelper.getReadableDatabase().query(
+                retCursor = db.query(
                         FavouritesEntry.TABLE_NAME,
                         projection,
                         selection,
@@ -127,7 +130,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case FAVOURITES_WITH_ID: {
-                retCursor = mOpenHelper.getReadableDatabase().query(
+                retCursor = db.query(
                         FavouritesEntry.TABLE_NAME,
                         projection,
                         FavouritesEntry._ID + " = ?",
@@ -147,30 +150,30 @@ public class MovieProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        final int match = sUriMatcher.match(uri);
         Uri returnUri;
+        long newRowId;
 
-        switch (match) {
+        switch (sUriMatcher.match(uri)) {
             case POPULARITY: {
-                long _id = db.insert(PopularityEntry.TABLE_NAME, null, values);
-                if (_id > 0)
-                    returnUri = PopularityEntry.buildPopularityUri(_id);
+                newRowId = db.insert(PopularityEntry.TABLE_NAME, null, values);
+                if (newRowId > 0)
+                    returnUri = PopularityEntry.buildPopularityUri(newRowId);
                 else
                     throw new android.database.SQLException("Failed to insert row into: " + uri);
                 break;
             }
             case RATING: {
-                long _id = db.insert(RatingEntry.TABLE_NAME, null, values);
-                if (_id > 0)
-                    returnUri = RatingEntry.buildRatingUri(_id);
+                newRowId = db.insert(RatingEntry.TABLE_NAME, null, values);
+                if (newRowId > 0)
+                    returnUri = RatingEntry.buildRatingUri(newRowId);
                 else
                     throw new android.database.SQLException("Failed to insert row into: " + uri);
                 break;
             }
             case FAVOURITES: {
-                long _id = db.insert(FavouritesEntry.TABLE_NAME, null, values);
-                if (_id > 0)
-                    returnUri = FavouritesEntry.buildFavouritesUri(_id);
+                newRowId = db.insert(FavouritesEntry.TABLE_NAME, null, values);
+                if (newRowId > 0)
+                    returnUri = FavouritesEntry.buildFavouritesUri(newRowId);
                 else
                     throw new android.database.SQLException("Failed to insert row into: " + uri);
                 break;
@@ -185,56 +188,62 @@ public class MovieProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        final int match = sUriMatcher.match(uri);
         int numDeleted;
-        switch (match) {
+        switch (sUriMatcher.match(uri)) {
             case POPULARITY:
                 numDeleted = db.delete(
                         PopularityEntry.TABLE_NAME, selection, selectionArgs);
-                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" +
-                        PopularityEntry.TABLE_NAME + "'");
+//                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" +
+//                        PopularityEntry.TABLE_NAME + "'");
+                db.delete("SQLITE_SEQUENCE",
+                        "NAME = ?",
+                        new String[]{PopularityEntry.TABLE_NAME});
                 break;
             case POPULARITY_WITH_ID:
                 numDeleted = db.delete(PopularityEntry.TABLE_NAME,
                         PopularityEntry._ID + " = ?",
                         new String[]{String.valueOf(ContentUris.parseId(uri))});
-                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" +
-                        PopularityEntry.TABLE_NAME + "'");
+                db.delete("SQLITE_SEQUENCE",
+                        "NAME = ?",
+                        new String[]{PopularityEntry.TABLE_NAME});
                 break;
             case RATING:
                 numDeleted = db.delete(
                         RatingEntry.TABLE_NAME, selection, selectionArgs);
-                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" +
-                        RatingEntry.TABLE_NAME + "'");
+                db.delete("SQLITE_SEQUENCE",
+                        "NAME = ?",
+                        new String[]{RatingEntry.TABLE_NAME});
                 break;
             case RATING_WITH_ID:
                 numDeleted = db.delete(PopularityEntry.TABLE_NAME,
                         RatingEntry._ID + " = ?",
                         new String[]{String.valueOf(ContentUris.parseId(uri))});
-                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" +
-                        RatingEntry.TABLE_NAME + "'");
+                db.delete("SQLITE_SEQUENCE",
+                        "NAME = ?",
+                        new String[]{RatingEntry.TABLE_NAME});
                 break;
             case FAVOURITES:
                 numDeleted = db.delete(
                         FavouritesEntry.TABLE_NAME, selection, selectionArgs);
-                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" +
-                        FavouritesEntry.TABLE_NAME + "'");
+                db.delete("SQLITE_SEQUENCE",
+                        "NAME = ?",
+                        new String[]{FavouritesEntry.TABLE_NAME});
                 break;
             case FAVOURITES_WITH_ID:
                 numDeleted = db.delete(PopularityEntry.TABLE_NAME,
                         FavouritesEntry._ID + " = ?",
                         new String[]{String.valueOf(ContentUris.parseId(uri))});
-                db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" +
-                        FavouritesEntry.TABLE_NAME + "'");
+                db.delete("SQLITE_SEQUENCE",
+                        "NAME = ?",
+                        new String[]{FavouritesEntry.TABLE_NAME});
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        if (numDeleted != 0)
+        if (numDeleted > 0)
             getContext().getContentResolver().notifyChange(uri, null);
         return numDeleted;
     }
-
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
@@ -292,27 +301,24 @@ public class MovieProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
             }
         }
-
-        if (numUpdated > 0) {
+        if (numUpdated > 0)
             getContext().getContentResolver().notifyChange(uri, null);
-        }
-
         return numUpdated;
     }
 
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        final int match = sUriMatcher.match(uri);
-        int returnCount;
-        switch (match) {
+        int returnCount = 0;
+        long newRowId;
+
+        switch (sUriMatcher.match(uri)) {
             case POPULARITY:
                 db.beginTransaction();
-                returnCount = 0;
                 try {
                     for (ContentValues value : values) {
-                        long _id = db.insert(PopularityEntry.TABLE_NAME, null, value);
-                        if (_id != -1) {
+                        newRowId = db.insert(PopularityEntry.TABLE_NAME, null, value);
+                        if (newRowId != -1) {
                             returnCount++;
                         }
                     }
@@ -324,11 +330,10 @@ public class MovieProvider extends ContentProvider {
                 return returnCount;
             case RATING:
                 db.beginTransaction();
-                returnCount = 0;
                 try {
                     for (ContentValues value : values) {
-                        long _id = db.insert(RatingEntry.TABLE_NAME, null, value);
-                        if (_id != -1) {
+                        newRowId = db.insert(RatingEntry.TABLE_NAME, null, value);
+                        if (newRowId != -1) {
                             returnCount++;
                         }
                     }
@@ -340,11 +345,10 @@ public class MovieProvider extends ContentProvider {
                 return returnCount;
             case FAVOURITES:
                 db.beginTransaction();
-                returnCount = 0;
                 try {
                     for (ContentValues value : values) {
-                        long _id = db.insert(FavouritesEntry.TABLE_NAME, null, value);
-                        if (_id != -1) {
+                        newRowId = db.insert(FavouritesEntry.TABLE_NAME, null, value);
+                        if (newRowId != -1) {
                             returnCount++;
                         }
                     }

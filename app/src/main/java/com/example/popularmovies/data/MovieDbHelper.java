@@ -36,22 +36,6 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 Columns.REVIEW + " TEXT DEFAULT None " +
                 ");";
 
-//        final String SQL_CREATE_POPULARITY_TABLE = "CREATE TABLE " + PopularityEntry.TABLE_NAME + " (" +
-//                PopularityEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-//                Columns.POSTER_THUMB + " TEXT NOT NULL, " +
-//                Columns.POSTER_FULL + " TEXT NOT NULL, " +
-//                Columns.SUMMARY + " TEXT NOT NULL, " +
-//                Columns.DATE + " INTEGER NOT NULL, " +
-//                Columns.TITLE + " TEXT NOT NULL, " +
-//                Columns.RATING + " REAL NOT NULL, " +
-////                " FOREIGN KEY (" + Columns.TRAILERS_KEY + ") REFERENCES " +
-////                TrailersEntry.TABLE_NAME + " (" + TrailersEntry._ID + "), " +
-////                " FOREIGN KEY (" + Columns.REVIEWS_KEY + ") REFERENCES " +
-////                ReviewsEntry.TABLE_NAME + " (" + ReviewsEntry._ID + "), " +
-//                Columns.TRAILER + " TEXT DEFAULT None, " +
-//                Columns.REVIEW + " TEXT DEFAULT None " +
-//                ");";
-
         final String SQL_CREATE_POPULARITY_TABLE = "CREATE TABLE " + PopularityEntry.TABLE_NAME + " (" +
                 PopularityEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 SQL_COLUMNS_STUB;
@@ -63,39 +47,6 @@ public class MovieDbHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_FAVOURITES_TABLE = "CREATE TABLE " + FavouritesEntry.TABLE_NAME + " (" +
                 FavouritesEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 SQL_COLUMNS_STUB;
-
-
-//        final String SQL_CREATE_RATING_TABLE = "CREATE TABLE " + RatingEntry.TABLE_NAME +
-//                " AS SELECT * FROM " + PopularityEntry.TABLE_NAME +
-//                ");";
-//
-//        final String SQL_CREATE_FAVOURITES_TABLE = "CREATE TABLE " + MovieContract.FavouritesEntry.TABLE_NAME +
-//                " AS SELECT * FROM " + PopularityEntry.TABLE_NAME +
-//                ");";
-
-//        final String SQL_CREATE_RATING_TABLE = "CREATE TABLE " + RatingEntry.TABLE_NAME + " (" +
-//                RatingEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-//                Columns.POSTER_THUMB + " TEXT NOT NULL, " +
-//                Columns.POSTER_FULL + " TEXT NOT NULL, " +
-//                Columns.SUMMARY + " TEXT NOT NULL, " +
-//                Columns.DATE + " INTEGER NOT NULL, " +
-//                Columns.TITLE + " TEXT NOT NULL, " +
-//                Columns.RATING + " REAL NOT NULL, " +
-//                Columns.TRAILER + " TEXT NOT NULL, " +
-//                Columns.REVIEW + " TEXT NOT NULL " +
-//                " );";
-//
-//        final String SQL_CREATE_FAVOURITES_TABLE = "CREATE TABLE " + FavouritesEntry.TABLE_NAME + " (" +
-//                FavouritesEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-//                Columns.POSTER_THUMB + " TEXT NOT NULL, " +
-//                Columns.POSTER_FULL + " TEXT NOT NULL, " +
-//                Columns.SUMMARY + " TEXT NOT NULL, " +
-//                Columns.DATE + " INTEGER NOT NULL, " +
-//                Columns.TITLE + " TEXT NOT NULL, " +
-//                Columns.RATING + " REAL NOT NULL, " +
-//                Columns.TRAILER + " TEXT NOT NULL, " +
-//                Columns.REVIEW + " TEXT NOT NULL " +
-//                " );";
 
         //not sure if need separate trailer/review table for each
 //        final String SQL_CREATE_TRAILERS_TABLE = "CREATE TABLE " + TrailersEntry.TABLE_NAME + " (" +

@@ -7,7 +7,7 @@ import android.provider.BaseColumns;
 
 public class MovieContract {
 
-    public static String CONTENT_AUTHORITY = "com.example.popularmovies.app";
+    public static String CONTENT_AUTHORITY = "com.example.popularmovies.provider";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     public static final String PATH_POPULARITY = "popularity";
     public static final String PATH_RATING = "rating";
@@ -29,24 +29,19 @@ public class MovieContract {
         public static final String REVIEWS_KEY = "reviews_id";
     }
 
-    public static String getContentType(String path){
-        return ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + path;
+    public static String getContentDirType(String path){
+        return ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd." + CONTENT_AUTHORITY + "." + path;
     }
 
     public static String getContentItemType(String path){
-        return ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + path;
+        return ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd." + CONTENT_AUTHORITY + "." + path;
     }
 
     public static final class PopularityEntry implements BaseColumns{
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_POPULARITY).build();
 
-//        public static final String CONTENT_TYPE =
-//                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_POPULARITY;
-//        public static final String CONTENT_ITEM_TYPE =
-//                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_POPULARITY;
-
-        public static final String CONTENT_TYPE = getContentType(PATH_POPULARITY);
+        public static final String CONTENT_DIR_TYPE = getContentDirType(PATH_POPULARITY);
         public static final String CONTENT_ITEM_TYPE = getContentItemType(PATH_POPULARITY);
 
         public static final String TABLE_NAME = "popularity";
@@ -60,12 +55,7 @@ public class MovieContract {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_RATING).build();
 
-//        public static final String CONTENT_TYPE =
-//                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_RATING;
-//        public static final String CONTENT_ITEM_TYPE =
-//                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_RATING;
-
-        public static final String CONTENT_TYPE = getContentType(PATH_RATING);
+        public static final String CONTENT_DIR_TYPE = getContentDirType(PATH_RATING);
         public static final String CONTENT_ITEM_TYPE = getContentItemType(PATH_RATING);
 
         public static final String TABLE_NAME = "rating";
@@ -79,12 +69,7 @@ public class MovieContract {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_FAVOURITES).build();
 
-//        public static final String CONTENT_TYPE =
-//                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_FAVOURITES;
-//        public static final String CONTENT_ITEM_TYPE =
-//                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_FAVOURITES;
-
-        public static final String CONTENT_TYPE = getContentType(PATH_FAVOURITES);
+        public static final String CONTENT_DIR_TYPE = getContentDirType(PATH_FAVOURITES);
         public static final String CONTENT_ITEM_TYPE = getContentItemType(PATH_FAVOURITES);
 
         public static final String TABLE_NAME = "favourites";
@@ -100,7 +85,7 @@ public class MovieContract {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_TRAILERS).build();
 
-        public static final String CONTENT_TYPE = getContentType(PATH_TRAILERS);
+        public static final String CONTENT_TYPE = getContentDirType(PATH_TRAILERS);
         public static final String CONTENT_ITEM_TYPE = getContentItemType(PATH_TRAILERS);
 
         public static final String TABLE_NAME = "trailers";
@@ -114,7 +99,7 @@ public class MovieContract {
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_REVIEWS).build();
 
-        public static final String CONTENT_TYPE = getContentType(PATH_REVIEWS);
+        public static final String CONTENT_TYPE = getContentDirType(PATH_REVIEWS);
         public static final String CONTENT_ITEM_TYPE = getContentItemType(PATH_REVIEWS);
 
         public static final String TABLE_NAME = "reviews";

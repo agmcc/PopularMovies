@@ -2,14 +2,12 @@ package com.example.popularmovies;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import com.example.popularmovies.data.MovieContract;
-import com.example.popularmovies.data.MovieDbHelper;
 import com.squareup.picasso.Picasso;
 
 public class ImageAdapter extends BaseAdapter {
@@ -19,29 +17,40 @@ public class ImageAdapter extends BaseAdapter {
 
     public ImageAdapter(Context c) {
         mContext = c;
-        SQLiteDatabase db = new MovieDbHelper(mContext).getReadableDatabase();
+//        SQLiteDatabase db = new MovieDbHelper(mContext).getReadableDatabase();
+//
 //        Cursor cursor = db.query(
 //                MovieContract.PopularityEntry.TABLE_NAME,
 //                new String[]{MovieContract.Columns.POSTER_THUMB},
-//                null,
-//                null,
-//                null,
-//                null,
-//                null
+//                null, null, null, null, null
 //        );
-        final String query = "SELECT " + MovieContract.Columns.POSTER_THUMB
-                + " FROM " + MovieContract.PopularityEntry.TABLE_NAME;
-        Cursor cursor = db.rawQuery(query, null);
+//
+//        if (cursor != null) {
+//            thumbs = new String[cursor.getCount()];
+//            if (cursor.moveToFirst()) {
+//                do {
+//                    thumbs[cursor.getPosition()] = cursor.getString(0);
+//                } while (cursor.moveToNext());
+//            }
+//            cursor.close();
+//        }
+//        db.close();
+        Cursor cursor = mContext.getContentResolver().query(
+                MovieContract.PopularityEntry.CONTENT_URI,
+                new String[]{MovieContract.Columns.POSTER_THUMB},
+                null, null, null);
+
+        thumbs = new String[cursor.getCount()];
+
         if (cursor != null) {
-            thumbs = new String[cursor.getCount()];
-            if (cursor.moveToFirst()) {
-                do {
+            try {
+                while (cursor.moveToNext()) {
                     thumbs[cursor.getPosition()] = cursor.getString(0);
-                } while (cursor.moveToNext());
+                }
+            } finally {
+                cursor.close();
             }
-            cursor.close();
         }
-        db.close();
     }
 
     @Override
@@ -53,7 +62,6 @@ public class ImageAdapter extends BaseAdapter {
             view.setScaleType(ImageView.ScaleType.CENTER_CROP);
         }
         String url = getItem(position);
-        //Log.e("Adapter", url);
 
         Picasso mPicasso = Picasso.with(mContext);
         //mPicasso.setIndicatorsEnabled(true);
@@ -66,14 +74,12 @@ public class ImageAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        //return MovieData.poster_thumbnail.length;
         return thumbs.length;
     }
 
     @Override
     public String getItem(int position) {
         return thumbs[position];
-        //return MovieData.poster_thumbnail[position];
     }
 
     @Override

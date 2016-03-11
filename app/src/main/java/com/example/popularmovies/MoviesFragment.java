@@ -1,8 +1,8 @@
 package com.example.popularmovies;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,7 +25,6 @@ import android.widget.Toast;
 
 import com.example.popularmovies.data.MovieContract;
 import com.example.popularmovies.data.MovieContract.Columns;
-import com.example.popularmovies.data.MovieDbHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,6 +36,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Vector;
 
 public class MoviesFragment extends Fragment implements OnItemSelectedListener {
 
@@ -203,20 +203,23 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener {
             final String POSTER_THUMB_SIZE = "w185";
             final String POSTER_FULL_SIZE = "w780";
 
-            //Log.v(LOG_TAG, "JSON: " + movieDataJsonStr);
             JSONObject movieDataJson = new JSONObject(movieDataJsonStr);
             JSONArray movieDataArray = movieDataJson.getJSONArray(MOVIE_DB_RESULTS);
 
             int numMovies = movieDataArray.length();
 
-            //String[][] results = new String[6][numMovies];
-//            Vector<ContentValues> cVVector = new Vector<ContentValues>(movieDataArray.length());
-            SQLiteDatabase db = new MovieDbHelper(getContext()).getWritableDatabase();
+//            SQLiteDatabase db = new MovieDbHelper(getContext()).getWritableDatabase();
 
-            db.delete("SQLITE_SEQUENCE", "NAME = ?", new String[]{MovieContract.PopularityEntry.TABLE_NAME});
-            db.delete("SQLITE_SEQUENCE", "NAME = ?", new String[]{MovieContract.RatingEntry.TABLE_NAME});
-            db.delete(MovieContract.PopularityEntry.TABLE_NAME, null, null);
-            db.delete(MovieContract.RatingEntry.TABLE_NAME, null, null);
+//            db.delete("SQLITE_SEQUENCE", "NAME = ?", new String[]{MovieContract.PopularityEntry.TABLE_NAME});
+//            db.delete("SQLITE_SEQUENCE", "NAME = ?", new String[]{MovieContract.RatingEntry.TABLE_NAME});
+//            db.delete(MovieContract.PopularityEntry.TABLE_NAME, null, null);
+//            db.delete(MovieContract.RatingEntry.TABLE_NAME, null, null);
+
+            ContentResolver resolver = getContext().getContentResolver();
+            resolver.delete(MovieContract.PopularityEntry.CONTENT_URI, null, null);
+            resolver.delete(MovieContract.RatingEntry.CONTENT_URI, null, null);
+
+            Vector<ContentValues> cVVector = new Vector<ContentValues>(movieDataArray.length());
 
             for (int i = 0; i < numMovies; i++) {
                 JSONObject movieObject = movieDataArray.getJSONObject(i);
@@ -239,7 +242,6 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener {
                 String vote = movieObject.getString(MOVIE_DB_VOTE);
                 //todo parse trailer and review- will do separatey
 
-                ContentValues movieValues = new ContentValues();
                 //todo add to different db based on spinner (popular, rating)
                 //todo add first trailer and review (test)
                 //todo fix inconsistent names e.g. vote, summary etc.
@@ -253,6 +255,8 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener {
 //                public static final String TRAILER = "trailer";
 //                public static final String REVIEW = "review";
 
+                ContentValues movieValues = new ContentValues();
+
                 movieValues.put(Columns.POSTER_THUMB, poster_thumb);
                 movieValues.put(Columns.POSTER_FULL, poster_full);
                 movieValues.put(Columns.SUMMARY, overview);
@@ -263,77 +267,27 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener {
                 //movieValues.put(Columns.REVIEW, review);
 
                 //temp only use underlying sqlite NOT Content provider
-                db.insert(
-                        MovieContract.PopularityEntry.TABLE_NAME,
-                        null,
-                        movieValues
-                );
-                //cVVector.add(movieValues);
-
-
-//                results[0][i] = poster_thumb.toString();
-//                results[1][i] = poster_full.toString();
-//                results[2][i] = overview;
-//                results[3][i] = date;
-//                results[4][i] = title;
-//                results[5][i] = vote;
+                //N.B. Currently using Popularity table to store both popular + rating (overwriting)
+//                db.insert(
+//                        MovieContract.PopularityEntry.TABLE_NAME,
+//                        null,
+//                        movieValues
+//                );
+                cVVector.add(movieValues);
             }
-            db.close();
+//            db.close();
 
             //write to db
             //n.b. this is where would decide which db (rating, popular) to put cvs into
-//            if (cVVector.size() > 0) {
-//                ContentValues[] cvArray = new ContentValues[cVVector.size()];
-//                cVVector.toArray(cvArray);
-//                getContext().getContentResolver().bulkInsert(PopularityEntry.CONTENT_URI, cvArray);
-//            }
+            if (cVVector.size() > 0) {
+                ContentValues[] cvArray = new ContentValues[cVVector.size()];
+                cVVector.toArray(cvArray);
+                resolver.bulkInsert(MovieContract.PopularityEntry.CONTENT_URI, cvArray);
+            }
         }
 
         @Override
         protected void onPostExecute(Void v) {
-//            super.onPostExecute(results);
-//
-//            MovieData.poster_thumbnail = results[0];
-//            MovieData.poster_full_size = results[1];
-//            MovieData.overview = results[2];
-//            MovieData.date = results[3];
-//            MovieData.title = results[4];
-//            MovieData.vote = results[5];
-
-//            SQLiteDatabase db = new MovieDbHelper(getContext()).getWritableDatabase();
-//            String[] projection = {
-//                    Columns.TITLE,
-//                    Columns.RATING
-//            };
-//            int titleInd = 0;
-//            int ratingInd = 1;
-//            String orderBy = Columns.RATING + " desc";
-//            String limit = "10";
-//            String selection = Columns.TITLE + " glob 'The*'";
-//            Cursor cursor = db.query(
-//                    MovieContract.PopularityEntry.TABLE_NAME,
-//                    projection,
-//                    selection,
-//                    null,
-//                    null,
-//                    null,
-//                    orderBy,
-//                    limit);
-//
-//
-//            if(cursor != null) {
-//                Log.v(LOG_TAG, cursor.getCount() + " rows");
-//                if (cursor.moveToFirst()) {
-//                    do {
-//                        String title = cursor.getString(titleInd);
-//                        String rating = cursor.getString(ratingInd);
-//                        Log.v(LOG_TAG, title +"\t" + rating);
-//                    } while (cursor.moveToNext());
-//                }
-//                cursor.close();
-//            }
-//            db.close();
-
             gridView.setAdapter(new ImageAdapter(getContext()));
         }
     }

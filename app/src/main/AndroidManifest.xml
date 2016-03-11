@@ -25,7 +25,7 @@
                 android:value="com.example.popularmovies.MainActivity" />
         </activity>
         <provider
-            android:authorities="com.example.popularmovies.app"
+            android:authorities="com.example.popularmovies.provider"
             android:name=".data.MovieProvider"/>
     </application>
 
