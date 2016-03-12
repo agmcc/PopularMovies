@@ -2,6 +2,7 @@ package com.example.popularmovies;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -43,13 +44,12 @@ import java.util.Vector;
 public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final int MOVIE_LOADER = 0;
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
-
     private final String POPULARITY = "popularity.desc";
     private final String RATING = "vote_average.desc";
     protected String sortMode = POPULARITY;
     protected GridView gridView;
-    private static final int MOVIE_LOADER = 0;
     private MovieAdapter mAdapter;
 
     public MoviesFragment() {
@@ -107,6 +107,15 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
 //                startActivity(detailIntent);
 //            }
 //        });
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+//               //pass intent with uri for movie row- detail fragment will create a loader to retrieve info
+                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
+                        .setData(MovieContract.PopularityEntry.buildPopularityUri(position + 1));
+                startActivity(detailIntent);
+            }
+        });
         return rootView;
     }
 
