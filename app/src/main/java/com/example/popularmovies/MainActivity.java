@@ -3,6 +3,8 @@ package com.example.popularmovies;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.example.popularmovies.sync.MovieSyncAdapter;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -14,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
                     .add(R.id.main_container, new MoviesFragment())
                     .commit();
         }
+        MovieSyncAdapter.initializeSyncAdapter(this);
     }
 
 }

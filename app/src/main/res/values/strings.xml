@@ -3,7 +3,7 @@
     <string name="sort_popularity">Popularity</string>
     <string name="sort_rating">Rating</string>
     <string name="sort_title">Sort</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- SyncAdapter related -->
+    <string name="sync_account_type">sunshine.example.com</string>
+    <string name="content_authority">com.example.popularmovies.provider</string>
 </resources>

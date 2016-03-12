@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.example.popularmovies.data.MovieContract;
 import com.example.popularmovies.data.MovieContract.Columns;
+import com.example.popularmovies.sync.MovieSyncAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,13 +45,13 @@ import java.util.Vector;
 public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final int MOVIE_LOADER = 0;
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
     private final String POPULARITY = "popularity.desc";
     private final String RATING = "vote_average.desc";
     protected String sortMode = POPULARITY;
     protected GridView gridView;
     private MovieAdapter mAdapter;
-    private static final int MOVIE_LOADER = 0;
 
     public MoviesFragment() {
     }
@@ -85,7 +86,7 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
             sortMode = RATING;
         }
         Toast.makeText(getContext(), "Sort by " + choice, Toast.LENGTH_SHORT).show();
-        getMovieData();
+        updateMovies();
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
@@ -116,15 +117,10 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         super.onActivityCreated(savedInstanceState);
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        getMovieData();
-    }
-
-    private void getMovieData() {
-        FetchMoviesTask task = new FetchMoviesTask();
-        task.execute();
+    private void updateMovies() {
+//        FetchMoviesTask task = new FetchMoviesTask();
+//        task.execute();
+        MovieSyncAdapter.syncImmediately(getActivity());
     }
 
     @Override
