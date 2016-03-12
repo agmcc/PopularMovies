@@ -44,13 +44,13 @@ import java.util.Vector;
 public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final int MOVIE_LOADER = 0;
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
     private final String POPULARITY = "popularity.desc";
     private final String RATING = "vote_average.desc";
     protected String sortMode = POPULARITY;
     protected GridView gridView;
     private MovieAdapter mAdapter;
+    private static final int MOVIE_LOADER = 0;
 
     public MoviesFragment() {
     }
@@ -95,22 +95,13 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
-        mAdapter = new MovieAdapter(getActivity(), null, 0);
         gridView = (GridView) rootView.findViewById(R.id.gridview);
+        mAdapter = new MovieAdapter(getActivity(), null, 0);
         gridView.setAdapter(mAdapter);
 
-//        gridView.setOnItemClickListener(new OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-//                        .putExtra(Intent.EXTRA_TEXT, position);
-//                startActivity(detailIntent);
-//            }
-//        });
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//               //pass intent with uri for movie row- detail fragment will create a loader to retrieve info
                 Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
                         .setData(MovieContract.PopularityEntry.buildPopularityUri(position + 1));
                 startActivity(detailIntent);

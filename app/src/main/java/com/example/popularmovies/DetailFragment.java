@@ -28,51 +28,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-//        int gridId = getActivity().getIntent().getIntExtra(Intent.EXTRA_TEXT, 0);
-//
-//        ImageView imageView = (ImageView) rootView.findViewById(R.id.poster_imageview);
-//        TextView title = (TextView) (rootView.findViewById(R.id.title_textview));
-//        TextView date = (TextView) (rootView.findViewById(R.id.date_textview));
-//        TextView rating = (TextView) (rootView.findViewById(R.id.rating_textview));
-//        TextView summary = (TextView) (rootView.findViewById(R.id.summary_textview));
-//
-//        final String[] projection = {
-//                Columns.POSTER_FULL,
-//                Columns.TITLE,
-//                Columns.DATE,
-//                Columns.RATING,
-//                Columns.SUMMARY,
-//        };
-//
-//        final int posterInd = 0;
-//        final int titleInd = 1;
-//        final int dateInd = 2;
-//        final int ratingInd = 3;
-//        final int summaryInd = 4;
-//
-//        Uri uri = MovieContract.PopularityEntry.buildPopularityUri(gridId + 1);
-//
-//        Cursor cursor = getContext().getContentResolver().query(
-//                uri,
-//                projection,
-//                null, null, null);
-//
-//        if (cursor != null) {
-//            try {
-//                if (cursor.moveToFirst()) {
-//                    Picasso.with(getContext())
-//                            .load(cursor.getString(posterInd))
-//                            .into(imageView);
-//
-//                    title.setText(cursor.getString(titleInd));
-//                    date.setText(cursor.getString(dateInd));
-//                    rating.setText(cursor.getString(ratingInd));
-//                    summary.setText(cursor.getString(summaryInd));
-//                }
-//            } finally {
-//                cursor.close();
-//            }
-//        }
         DetailViewHolder detailViewHolder = new DetailViewHolder(rootView);
         rootView.setTag(detailViewHolder);
         return rootView;
