@@ -1,18 +1,13 @@
 package com.example.popularmovies;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,18 +24,6 @@ import android.widget.Toast;
 import com.example.popularmovies.data.MovieContract;
 import com.example.popularmovies.data.MovieContract.Columns;
 import com.example.popularmovies.sync.MovieSyncAdapter;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Vector;
 
 public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         LoaderManager.LoaderCallbacks<Cursor> {
@@ -117,9 +100,8 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         super.onActivityCreated(savedInstanceState);
     }
 
+    //todo may be redundant- just call MovieSyncAdapter directly
     private void updateMovies() {
-//        FetchMoviesTask task = new FetchMoviesTask();
-//        task.execute();
         MovieSyncAdapter.syncImmediately(getActivity());
     }
 
@@ -144,158 +126,6 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
-    }
-
-    private class FetchMoviesTask extends AsyncTask<String, Void, Void> {
-
-        private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
-
-        @Override
-        protected Void doInBackground(String... params) {
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-            String moviesJsonStr;
-
-            try {
-
-                final String MOVIE_DB_BASE_URL = "http://api.themoviedb.org/3/discover";
-                final String CONTENT_TYPE = "movie";
-                final String SORT_PARAM = "sort_by";
-                final String API_KEY_PARAM = "api_key";
-
-                Uri builtUri = Uri.parse(MOVIE_DB_BASE_URL).buildUpon()
-                        .appendEncodedPath(CONTENT_TYPE)
-                        .appendQueryParameter(SORT_PARAM, sortMode)
-                        .appendQueryParameter(API_KEY_PARAM, BuildConfig.THE_MOVIE_DB_API_KEY)
-                        .build();
-
-                URL url = new URL(builtUri.toString());
-                //Log.v(LOG_TAG, "Built URI " + builtUri.toString());
-
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-
-                if (inputStream == null) {
-                    return null;
-                }
-
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    buffer.append(line + "\n");
-                }
-
-                if (buffer.length() == 0) {
-                    return null;
-                }
-
-                moviesJsonStr = buffer.toString();
-
-                //Log.v(LOG_TAG, "Movies JSON String: " + moviesJsonStr);
-
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Error ", e);
-                return null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-            }
-            try {
-                getMovieDataFromJSON(moviesJsonStr);
-            } catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        private void getMovieDataFromJSON(String movieDataJsonStr) throws JSONException {
-
-            final String MOVIE_DB_RESULTS = "results";
-            final String MOVIE_DB_POSTER = "poster_path";
-            final String MOVIE_DB_OVERVIEW = "overview";
-            final String MOVIE_DB_DATE = "release_date";
-            final String MOVIE_DB_TITLE = "title";
-            final String MOVIE_DB_VOTE = "vote_average";
-
-            final String POSTER_BASE_URL = "https://image.tmdb.org/t/p";
-            final String POSTER_THUMB_SIZE = "w185";
-            final String POSTER_FULL_SIZE = "w780";
-
-            JSONObject movieDataJson = new JSONObject(movieDataJsonStr);
-            JSONArray movieDataArray = movieDataJson.getJSONArray(MOVIE_DB_RESULTS);
-
-            int numMovies = movieDataArray.length();
-
-            ContentResolver resolver = getContext().getContentResolver();
-            resolver.delete(MovieContract.PopularityEntry.CONTENT_URI, null, null);
-            resolver.delete(MovieContract.RatingEntry.CONTENT_URI, null, null);
-
-            Vector<ContentValues> cVVector = new Vector<ContentValues>(movieDataArray.length());
-
-            for (int i = 0; i < numMovies; i++) {
-                JSONObject movieObject = movieDataArray.getJSONObject(i);
-
-                String poster_thumb = Uri.parse(POSTER_BASE_URL).buildUpon()
-                        .appendEncodedPath(POSTER_THUMB_SIZE)
-                        .appendEncodedPath(movieObject.getString(MOVIE_DB_POSTER))
-                        .build()
-                        .toString();
-
-                String poster_full = Uri.parse(POSTER_BASE_URL).buildUpon()
-                        .appendEncodedPath(POSTER_FULL_SIZE)
-                        .appendEncodedPath(movieObject.getString(MOVIE_DB_POSTER))
-                        .build()
-                        .toString();
-
-                String summary = movieObject.getString(MOVIE_DB_OVERVIEW);
-                String date = movieObject.getString(MOVIE_DB_DATE);
-                String title = movieObject.getString(MOVIE_DB_TITLE);
-                String rating = movieObject.getString(MOVIE_DB_VOTE);
-                //todo parse trailer and review- will do separatey
-
-                //todo add to different db based on spinner (popular, rating)
-                //todo add first trailer and review (test)
-
-                ContentValues movieValues = new ContentValues();
-
-                movieValues.put(Columns.POSTER_THUMB, poster_thumb);
-                movieValues.put(Columns.POSTER_FULL, poster_full);
-                movieValues.put(Columns.SUMMARY, summary);
-                movieValues.put(Columns.DATE, date);
-                movieValues.put(Columns.TITLE, title);
-                movieValues.put(Columns.RATING, rating);
-//                movieValues.put(Columns.TRAILER, trailer);
-                //movieValues.put(Columns.REVIEW, review);
-
-                cVVector.add(movieValues);
-            }
-
-            //n.b. this is where would decide which db (rating, popular) to put cvs into
-            if (cVVector.size() > 0) {
-                ContentValues[] cvArray = new ContentValues[cVVector.size()];
-                cVVector.toArray(cvArray);
-                resolver.bulkInsert(MovieContract.PopularityEntry.CONTENT_URI, cvArray);
-            }
-        }
-
-//        @Override
-//        protected void onPostExecute(Void v) {
-//            gridView.setAdapter(new ImageAdapter(getContext()));
-//        }
     }
 
 }
