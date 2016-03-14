@@ -29,9 +29,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:columnWidth="@dimen/grid_col_width"
         android:horizontalSpacing="@dimen/grid_spacing"
         android:numColumns="auto_fit"
+        android:columnWidth="@dimen/grid_col_width"
         android:stretchMode="columnWidth"
         android:verticalSpacing="@dimen/grid_spacing">
     </GridView>

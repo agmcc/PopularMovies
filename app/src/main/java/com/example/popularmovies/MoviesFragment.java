@@ -103,6 +103,7 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
 
         Toast.makeText(getContext(), "Sort by " + choice, Toast.LENGTH_SHORT).show();
         getLoaderManager().restartLoader(0, null, this);
+        gridView.smoothScrollToPosition(0);
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
