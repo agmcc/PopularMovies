@@ -14,7 +14,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.popularmovies.data.MovieContract.Columns;
+import com.example.popularmovies.data.Serializer;
 import com.squareup.picasso.Picasso;
+
+import java.net.URL;
+import java.util.HashMap;
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -52,6 +56,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 Columns.DATE,
                 Columns.RATING,
                 Columns.SUMMARY,
+                Columns.TRAILERS,
         };
 
         return new CursorLoader(
@@ -64,13 +69,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        DetailViewHolder viewHolder = (DetailViewHolder)getView().getTag();
+        DetailViewHolder viewHolder = (DetailViewHolder) getView().getTag();
 
         final int posterInd = 0;
         final int titleInd = 1;
         final int dateInd = 2;
         final int ratingInd = 3;
         final int summaryInd = 4;
+        final int trailersInd = 5;
 
         if (cursor != null) {
             try {
@@ -83,6 +89,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     viewHolder.date.setText(cursor.getString(dateInd));
                     viewHolder.rating.setText(cursor.getString(ratingInd));
                     viewHolder.summary.setText(cursor.getString(summaryInd));
+
+//                    byte[] trailerByteArray = cursor.getBlob(trailersInd);
+//                    ByteArrayInputStream byteStream = new ByteArrayInputStream(trailerByteArray);
+//                    ObjectInputStream objectStream = new ObjectInputStream(byteStream);
+//                    HashMap<String, URL> trailerMap = (HashMap<String, URL>)objectStream.readObject();
+                    byte[] trailerByteArray = cursor.getBlob(trailersInd);
+                    HashMap<String, URL> trailerMap =
+                            (HashMap<String, URL>) Serializer.deserialize(trailerByteArray);
+
+                    String firstKey = (String) trailerMap.keySet().toArray()[0];
+                    URL firstURL = trailerMap.get(firstKey);
+
+                    viewHolder.trailer.setText(firstKey + "\n" + firstURL.toString());
                 }
             } finally {
                 cursor.close();
@@ -101,6 +120,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         public final TextView date;
         public final TextView rating;
         public final TextView summary;
+        public final TextView trailer;
 
         public DetailViewHolder(View view) {
             imageView = (ImageView) view.findViewById(R.id.poster_imageview);
@@ -108,6 +128,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             date = (TextView) view.findViewById(R.id.date_textview);
             rating = (TextView) view.findViewById(R.id.rating_textview);
             summary = (TextView) view.findViewById(R.id.summary_textview);
+            trailer = (TextView) view.findViewById(R.id.trailer_textview);
         }
     }
 }

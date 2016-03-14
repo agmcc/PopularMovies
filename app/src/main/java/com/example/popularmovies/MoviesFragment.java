@@ -34,15 +34,17 @@ import com.example.popularmovies.sync.MovieSyncAdapter;
 public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         LoaderManager.LoaderCallbacks<Cursor> {
 
-    private final String LOG_TAG = MoviesFragment.class.getSimpleName();
-
     private static final int MOVIE_LOADER = 0;
+    private static final String SPINNER_POS = "spinner_pos";
+    private final String LOG_TAG = MoviesFragment.class.getSimpleName();
     protected GridView gridView;
     private Uri sortURI = PopularityEntry.CONTENT_URI;
     private String sortTable = PopularityEntry.TABLE_NAME;
     private String sortId = PopularityEntry._ID;
     private MovieAdapter mAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private Spinner mSpinner;
+    private int spinnerPos = 0;
 
     public MoviesFragment() {
     }
@@ -51,21 +53,30 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        if (savedInstanceState != null) {
+            spinnerPos = savedInstanceState.getInt(SPINNER_POS);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SPINNER_POS, mSpinner.getSelectedItemPosition());
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.movies_fragment_menu, menu);
         MenuItem item = menu.findItem(R.id.spinner);
-        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+        mSpinner = (Spinner) MenuItemCompat.getActionView(item);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 getContext(),
                 R.array.spinner_choices,
                 android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        spinner.setSelection(0, false);
-        spinner.setOnItemSelectedListener(this);
+        mSpinner.setAdapter(adapter);
+        mSpinner.setSelection(spinnerPos, false);
+        mSpinner.setOnItemSelectedListener(this);
     }
 
     @Override
@@ -126,7 +137,7 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
             }
         });
 
-        mSwipeRefreshLayout = (SwipeRefreshLayout)rootView.findViewById(R.id.swiperefresh);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swiperefresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -139,7 +150,7 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+            getLoaderManager().initLoader(MOVIE_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 

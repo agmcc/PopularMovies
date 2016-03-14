@@ -17,6 +17,7 @@ import android.util.Log;
 import com.example.popularmovies.BuildConfig;
 import com.example.popularmovies.R;
 import com.example.popularmovies.data.MovieContract;
+import com.example.popularmovies.data.Serializer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -308,8 +309,9 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
                 //tempoarily only caching trailer json and then parse in loader on demand
                 String trailerJsonStr = getJSONStr(trailerUrl);
+                byte[] trailerByteArray = parseTrailerJSON(trailerJsonStr);
 //                String trailers = parseTrailerJSON(trailerJsonStr);
-                movieValues.put(MovieContract.Columns.TRAILERS, trailerJsonStr);
+                movieValues.put(MovieContract.Columns.TRAILERS, trailerByteArray);
 
                 final String API_REVIEW = "reviews";
                 URL reviewURL = null;
@@ -342,7 +344,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    private String parseTrailerJSON(String trailerJsonStr) {
+    private byte[] parseTrailerJSON(String trailerJsonStr) {
         final String MOVIE_DB_RESULTS = "results";
         final String MOVIE_DB_KEY = "key";
         final String MOVIE_DB_NAME = "name";
@@ -353,13 +355,15 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
 //        Log.v(LOG_TAG, "JSOM: " + trailerJsonStr);
-
+//        ByteArrayOutputStream byteStream = null;
+//        ObjectOutputStream objectStream = null;
         try {
             JSONObject trailerDataJson = new JSONObject(trailerJsonStr);
             JSONArray trailerDataArray = trailerDataJson.getJSONArray(MOVIE_DB_RESULTS);
 
             int numTrailers = trailerDataArray.length();
-            HashMap<String, URL> trailerMap = new HashMap<String, URL>();
+            //listedhashmap? or other type
+            HashMap<String, URL> trailerMap = new HashMap<>();
 
             for (int i = 0; i < numTrailers; i++) {
                 JSONObject trailerObject = trailerDataArray.getJSONObject(i);
@@ -369,7 +373,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch";
                 final String YOUTUBE_VIDEO_PARAM = "v";
 
-                URL trailerURL = null;
+                URL trailerURL;
                 Uri uri = Uri.parse(YOUTUBE_BASE_URL).buildUpon()
                         .appendQueryParameter(YOUTUBE_VIDEO_PARAM, trailerKey)
                         .build();
@@ -378,10 +382,15 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
                 trailerMap.put(trailerName, trailerURL);
             }
-        } catch (java.net.MalformedURLException e) {
+
+//            //if this works, will make serialize class
+//            byteStream = new ByteArrayOutputStream();
+//            objectStream = new ObjectOutputStream(byteStream);
+//            objectStream.writeObject(trailerMap);
+//            return byteStream.toByteArray();
+            return Serializer.serialize(trailerMap);
+        } catch (JSONException | IOException e) {
             Log.e(LOG_TAG, e.getMessage());
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, e.getMessage(), e);
         }
         return null;
     }

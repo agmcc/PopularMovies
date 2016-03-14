@@ -14,8 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity"
-            android:label="Movies"
-            android:launchMode="singleTop">
+            android:label="Movies">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

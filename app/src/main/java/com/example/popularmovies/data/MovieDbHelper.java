@@ -27,7 +27,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 Columns.DATE + " INTEGER NOT NULL, " +
                 Columns.TITLE + " TEXT NOT NULL, " +
                 Columns.RATING + " REAL NOT NULL, " +
-                Columns.TRAILERS + " TEXT, " +
+                Columns.TRAILERS + " BLOB, " +
                 Columns.REVIEWS + " TEXT" +
                 ");";
 
