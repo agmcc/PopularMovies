@@ -8,5 +8,15 @@
         app:actionViewClass="android.widget.Spinner"
         app:showAsAction="ifRoom">
     </item>
+    <item
+        android:id="@+id/menu_refresh"
+        app:showAsAction="never"
+        android:title="@string/menu_refresh">
+    </item>
+    <item
+        android:id="@+id/menu_settings"
+        app:showAsAction="never"
+        android:title="@string/menu_settings">
+    </item>
 
 </menu>

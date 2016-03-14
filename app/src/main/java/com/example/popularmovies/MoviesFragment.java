@@ -9,6 +9,8 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,21 +25,24 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.popularmovies.data.MovieContract;
+import com.example.popularmovies.data.MovieContract.Columns;
 import com.example.popularmovies.data.MovieContract.FavouritesEntry;
 import com.example.popularmovies.data.MovieContract.PopularityEntry;
 import com.example.popularmovies.data.MovieContract.RatingEntry;
-import com.example.popularmovies.data.MovieContract.Columns;
+import com.example.popularmovies.sync.MovieSyncAdapter;
 
 public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final int MOVIE_LOADER = 0;
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
+
+    private static final int MOVIE_LOADER = 0;
     protected GridView gridView;
     private Uri sortURI = PopularityEntry.CONTENT_URI;
     private String sortTable = PopularityEntry.TABLE_NAME;
     private String sortId = PopularityEntry._ID;
     private MovieAdapter mAdapter;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     public MoviesFragment() {
     }
@@ -61,6 +66,21 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         spinner.setAdapter(adapter);
         spinner.setSelection(0, false);
         spinner.setOnItemSelectedListener(this);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_refresh:
+                Log.i(LOG_TAG, "Refresh menu item selected");
+                mSwipeRefreshLayout.setRefreshing(true);
+                MovieSyncAdapter.syncImmediately(getActivity());
+                return true;
+            case R.id.menu_settings:
+                Log.i(LOG_TAG, "Settings menu click");
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void onItemSelected(AdapterView<?> parent, View view,
@@ -92,16 +112,25 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
+
         gridView = (GridView) rootView.findViewById(R.id.gridview);
         mAdapter = new MovieAdapter(getActivity(), null, 0);
         gridView.setAdapter(mAdapter);
-
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
                         .setData(MovieContract.buildUri(sortURI, position + 1));
                 startActivity(detailIntent);
+            }
+        });
+
+        mSwipeRefreshLayout = (SwipeRefreshLayout)rootView.findViewById(R.id.swiperefresh);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.i(LOG_TAG, "onRefresh called from SwipeRefreshLayout");
+                MovieSyncAdapter.syncImmediately(getActivity());
             }
         });
         return rootView;
@@ -112,11 +141,6 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         getLoaderManager().initLoader(MOVIE_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
-
-//    //todo may be redundant- just call MovieSyncAdapter directly
-//    private void updateMovies() {
-//        MovieSyncAdapter.syncImmediately(getActivity());
-//    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -134,6 +158,8 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         mAdapter.swapCursor(cursor);
+        Log.i(LOG_TAG, "Load complete");
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
