@@ -2,6 +2,7 @@ package com.example.popularmovies;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -22,18 +23,20 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.popularmovies.data.MovieContract;
+import com.example.popularmovies.data.MovieContract.FavouritesEntry;
+import com.example.popularmovies.data.MovieContract.PopularityEntry;
+import com.example.popularmovies.data.MovieContract.RatingEntry;
 import com.example.popularmovies.data.MovieContract.Columns;
-import com.example.popularmovies.sync.MovieSyncAdapter;
 
 public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int MOVIE_LOADER = 0;
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
-    private final String POPULARITY = "popularity.desc";
-    private final String RATING = "vote_average.desc";
-    protected String sortMode = POPULARITY;
     protected GridView gridView;
+    private Uri sortURI = PopularityEntry.CONTENT_URI;
+    private String sortTable = PopularityEntry.TABLE_NAME;
+    private String sortId = PopularityEntry._ID;
     private MovieAdapter mAdapter;
 
     public MoviesFragment() {
@@ -63,13 +66,23 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
     public void onItemSelected(AdapterView<?> parent, View view,
                                int pos, long id) {
         String choice = parent.getItemAtPosition(pos).toString();
+
         if (choice.equals(getString(R.string.sort_popularity))) {
-            sortMode = POPULARITY;
+            sortURI = PopularityEntry.CONTENT_URI;
+            sortTable = PopularityEntry.TABLE_NAME;
+            sortId = PopularityEntry._ID;
         } else if (choice.equals(getString(R.string.sort_rating))) {
-            sortMode = RATING;
+            sortURI = RatingEntry.CONTENT_URI;
+            sortTable = RatingEntry.TABLE_NAME;
+            sortId = RatingEntry._ID;
+        } else if (choice.equals(getString(R.string.sort_favourites))) {
+            sortURI = FavouritesEntry.CONTENT_URI;
+            sortTable = FavouritesEntry.TABLE_NAME;
+            sortId = FavouritesEntry._ID;
         }
+
         Toast.makeText(getContext(), "Sort by " + choice, Toast.LENGTH_SHORT).show();
-        updateMovies();
+        getLoaderManager().restartLoader(0, null, this);
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
@@ -87,7 +100,7 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-                        .setData(MovieContract.PopularityEntry.buildPopularityUri(position + 1));
+                        .setData(MovieContract.buildUri(sortURI, position + 1));
                 startActivity(detailIntent);
             }
         });
@@ -100,20 +113,20 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         super.onActivityCreated(savedInstanceState);
     }
 
-    //todo may be redundant- just call MovieSyncAdapter directly
-    private void updateMovies() {
-        MovieSyncAdapter.syncImmediately(getActivity());
-    }
+//    //todo may be redundant- just call MovieSyncAdapter directly
+//    private void updateMovies() {
+//        MovieSyncAdapter.syncImmediately(getActivity());
+//    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         final String[] projection = {
-                MovieContract.PopularityEntry.TABLE_NAME + "." + MovieContract.PopularityEntry._ID,
+                sortTable + "." + sortId,
                 Columns.POSTER_THUMB
         };
 
         return new CursorLoader(getActivity(),
-                MovieContract.PopularityEntry.CONTENT_URI,
+                sortURI,
                 projection,
                 null, null, null);
     }

@@ -2,6 +2,7 @@
     <string name="app_name">Popular Movies</string>
     <string name="sort_popularity">Popularity</string>
     <string name="sort_rating">Rating</string>
+    <string name="sort_favourites">Favourites</string>
     <string name="sort_title">Sort</string>
     <!-- SyncAdapter related -->
     <string name="sync_account_type">sunshine.example.com</string>

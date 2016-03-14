@@ -20,20 +20,15 @@ public class MovieDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        //N.B. Will simplify and start with 1 traiiler and 1 review each movie, then later allow foreign keys
         final String SQL_COLUMNS_STUB =
                 Columns.POSTER_THUMB + " TEXT NOT NULL, " +
                 Columns.POSTER_FULL + " TEXT NOT NULL, " +
                 Columns.SUMMARY + " TEXT NOT NULL, " +
                 Columns.DATE + " INTEGER NOT NULL, " +
                 Columns.TITLE + " TEXT NOT NULL, " +
-                Columns.RATING + " REAL NOT NULL" +
-//                " FOREIGN KEY (" + Columns.TRAILERS_KEY + ") REFERENCES " +
-//                TrailersEntry.TABLE_NAME + " (" + TrailersEntry._ID + "), " +
-//                " FOREIGN KEY (" + Columns.REVIEWS_KEY + ") REFERENCES " +
-//                ReviewsEntry.TABLE_NAME + " (" + ReviewsEntry._ID + "), " +
-//                Columns.TRAILER + " TEXT DEFAULT None, " +
-//                Columns.REVIEW + " TEXT DEFAULT None " +
+                Columns.RATING + " REAL NOT NULL, " +
+                Columns.TRAILERS + " TEXT, " +
+                Columns.REVIEWS + " TEXT" +
                 ");";
 
         final String SQL_CREATE_POPULARITY_TABLE = "CREATE TABLE " + PopularityEntry.TABLE_NAME + " (" +
@@ -48,19 +43,6 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 FavouritesEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
                 SQL_COLUMNS_STUB;
 
-        //not sure if need separate trailer/review table for each
-//        final String SQL_CREATE_TRAILERS_TABLE = "CREATE TABLE " + TrailersEntry.TABLE_NAME + " (" +
-//                TrailersEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-//                Columns.TRAILER + " TEXT NOT NULL " +
-//                " );";
-//
-//        final String SQL_CREATE_REVIEWS_TABLE = "CREATE TABLE " + ReviewsEntry.TABLE_NAME + " (" +
-//                ReviewsEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-//                Columns.REVIEW + " TEXT NOT NULL " +
-//                " );";
-
-//        db.execSQL(SQL_CREATE_TRAILERS_TABLE);
-//        db.execSQL(SQL_CREATE_REVIEWS_TABLE);
         db.execSQL(SQL_CREATE_POPULARITY_TABLE);
         db.execSQL(SQL_CREATE_RATING_TABLE);
         db.execSQL(SQL_CREATE_FAVOURITES_TABLE);
@@ -71,7 +53,5 @@ public class MovieDbHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + PopularityEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + RatingEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + FavouritesEntry.TABLE_NAME);
-//        db.execSQL("DROP TABLE IF EXISTS " + TrailersEntry.TABLE_NAME);
-//        db.execSQL("DROP TABLE IF EXISTS " + ReviewsEntry.TABLE_NAME);
     }
 }
