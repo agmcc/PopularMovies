@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.popularmovies.data.MovieContract;
 import com.example.popularmovies.data.MovieContract.Columns;
 import com.example.popularmovies.data.Serializer;
 import com.squareup.picasso.Picasso;
@@ -23,7 +24,7 @@ import java.util.HashMap;
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String LOG_TAG = DetailFragment.class.getSimpleName();
-    private static final int DETAIL_LOADER = 0;
+    private static final int DETAIL_LOADER = 1;
 
     public DetailFragment() {
     }
@@ -50,6 +51,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if (intent == null)
             return null;
 
+        String sortTable = null;
+        String sortId = null;
+        if (intent.getData() == MovieContract.PopularityEntry.CONTENT_URI) {
+            sortTable = MovieContract.PopularityEntry.TABLE_NAME;
+            sortId = MovieContract.PopularityEntry._ID;
+        } else if (intent.getData() == MovieContract.RatingEntry.CONTENT_URI) {
+            sortTable = MovieContract.RatingEntry.TABLE_NAME;
+            sortId = MovieContract.RatingEntry._ID;
+        } else {
+            sortTable = MovieContract.FavouritesEntry.TABLE_NAME;
+            sortId = MovieContract.FavouritesEntry._ID;
+        }
+
         final String[] projection = {
                 Columns.POSTER_FULL,
                 Columns.TITLE,
@@ -59,8 +73,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 Columns.TRAILERS,
         };
 
-        return new CursorLoader(
-                getActivity(),
+        //or could try and change intent
+        return new CursorLoader(getActivity(),
                 intent.getData(),
                 projection,
                 null, null, null
@@ -79,32 +93,29 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         final int trailersInd = 5;
 
         if (cursor != null) {
-            try {
-                if (cursor.moveToFirst()) {
-                    Picasso.with(getContext())
-                            .load(cursor.getString(posterInd))
-                            .into(viewHolder.imageView);
+            if (cursor.moveToFirst()) {
+                Picasso.with(getContext())
+                        .load(cursor.getString(posterInd))
+                        .into(viewHolder.imageView);
 
-                    viewHolder.title.setText(cursor.getString(titleInd));
-                    viewHolder.date.setText(cursor.getString(dateInd));
-                    viewHolder.rating.setText(cursor.getString(ratingInd));
-                    viewHolder.summary.setText(cursor.getString(summaryInd));
+                viewHolder.title.setText(cursor.getString(titleInd));
+                viewHolder.date.setText(cursor.getString(dateInd));
+                viewHolder.rating.setText(cursor.getString(ratingInd));
+                viewHolder.summary.setText(cursor.getString(summaryInd));
 
-//                    byte[] trailerByteArray = cursor.getBlob(trailersInd);
-//                    ByteArrayInputStream byteStream = new ByteArrayInputStream(trailerByteArray);
-//                    ObjectInputStream objectStream = new ObjectInputStream(byteStream);
-//                    HashMap<String, URL> trailerMap = (HashMap<String, URL>)objectStream.readObject();
-                    byte[] trailerByteArray = cursor.getBlob(trailersInd);
-                    HashMap<String, URL> trailerMap =
-                            (HashMap<String, URL>) Serializer.deserialize(trailerByteArray);
+                byte[] trailerByteArray = cursor.getBlob(trailersInd);
+                HashMap<String, URL> trailerMap =
+                        (HashMap<String, URL>) Serializer.deserialize(trailerByteArray);
 
-                    String firstKey = (String) trailerMap.keySet().toArray()[0];
-                    URL firstURL = trailerMap.get(firstKey);
+                //Temp- will feed into recycler view
+                StringBuilder stringBuilder = new StringBuilder("Trailers\n");
 
-                    viewHolder.trailer.setText(firstKey + "\n" + firstURL.toString());
+                for (String key : trailerMap.keySet()) {
+                    for (URL value : trailerMap.values()) {
+                        stringBuilder.append(key + "\t" + value.toString() + "\n");
+                    }
                 }
-            } finally {
-                cursor.close();
+                viewHolder.trailer.setText(stringBuilder.toString());
             }
         }
     }
