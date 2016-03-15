@@ -27,6 +27,7 @@ public class MovieAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+        //use projection
         String url = cursor.getString(
                 cursor.getColumnIndex(MovieContract.Columns.POSTER_THUMB));
 //        Picasso.with(context).setIndicatorsEnabled(true);

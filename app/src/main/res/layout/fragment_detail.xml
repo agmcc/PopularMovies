@@ -18,22 +18,33 @@
             android:layout_width="match_parent"
             android:layout_height="400dp" />
 
+        <ToggleButton
+            android:id="@+id/toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Favourite" />
+
         <TextView
             android:id="@+id/title_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/poster_imageview"
             android:gravity="center_horizontal"
+            android:paddingBottom="8dp"
+            android:paddingTop="16dp"
             android:text="Movie Title"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:paddingTop="16dp"
-            android:paddingBottom="8dp"/>
+            android:textStyle="bold" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/trailer_textview"/>
+        <!--<TextView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/trailer_textview"/>-->
+
+        <!--<TextView-->
+            <!--android:id="@+id/review_textview"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content" />-->
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -59,7 +70,7 @@
                 android:layout_width="30dp"
                 android:layout_height="20dp"
                 android:layout_toRightOf="@id/rating_textview"
-                android:src="@drawable/ic_star"/>
+                android:src="@drawable/ic_star" />
 
         </RelativeLayout>
 
@@ -70,8 +81,14 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/rating_textview"
             android:gravity="center_horizontal"
-            android:text="Plot"
-            android:paddingTop="16dp" />
+            android:paddingTop="16dp"
+            android:text="Plot" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical" />
 
     </LinearLayout>
 

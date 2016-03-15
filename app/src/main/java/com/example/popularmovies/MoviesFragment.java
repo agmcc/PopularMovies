@@ -131,8 +131,11 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                //could be a method
+                String columnId = sortTable + "." + sortId;
                 Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-                        .setData(MovieContract.buildUri(sortURI, position + 1));
+                        .setData(MovieContract.buildUri(sortURI, position + 1))
+                        .putExtra(Intent.EXTRA_TEXT, columnId);
                 startActivity(detailIntent);
             }
         });

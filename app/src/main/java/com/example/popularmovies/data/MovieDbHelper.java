@@ -28,7 +28,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 Columns.TITLE + " TEXT NOT NULL, " +
                 Columns.RATING + " REAL NOT NULL, " +
                 Columns.TRAILERS + " BLOB, " +
-                Columns.REVIEWS + " TEXT" +
+                Columns.REVIEWS + " BLOB" +
                 ");";
 
         final String SQL_CREATE_POPULARITY_TABLE = "CREATE TABLE " + PopularityEntry.TABLE_NAME + " (" +

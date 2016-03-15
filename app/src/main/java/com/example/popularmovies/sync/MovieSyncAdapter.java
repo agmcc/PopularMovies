@@ -61,6 +61,8 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
         will start by using just popualrity and rating tables and only adding 1 trailer and 1 review each
         later worry about foreign keys / shared trailer tables etc.
+        //review: http://api.themoviedb.org/3/movie/293660/reviews?api_key=2e19e8fc023dd86dee79eb6b406fcd43
+        results json: results array, id author content url objects - want author and content
      */
 
     //// TODO: 12/03/2016 settings menu with sync frequency
@@ -296,38 +298,33 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 final String API_TRAILER = "videos";
                 final String API_KEY_PARAM = "api_key";
 
-                URL trailerUrl = null;
-
+                URL trailerUrl;
                 Uri trailerUri = Uri.parse(MOVIE_DB_BASE_URL).buildUpon()
                         .appendEncodedPath(CONTENT_TYPE)
                         .appendEncodedPath(id)
                         .appendEncodedPath(API_TRAILER)
                         .appendQueryParameter(API_KEY_PARAM, BuildConfig.THE_MOVIE_DB_API_KEY)
                         .build();
-
                 trailerUrl = new URL(trailerUri.toString());
 
-                //tempoarily only caching trailer json and then parse in loader on demand
                 String trailerJsonStr = getJSONStr(trailerUrl);
                 byte[] trailerByteArray = parseTrailerJSON(trailerJsonStr);
-//                String trailers = parseTrailerJSON(trailerJsonStr);
                 movieValues.put(MovieContract.Columns.TRAILERS, trailerByteArray);
 
                 final String API_REVIEW = "reviews";
-                URL reviewURL = null;
 
+                URL reviewURL;
                 Uri reviewUri = Uri.parse(MOVIE_DB_BASE_URL).buildUpon()
                         .appendEncodedPath(CONTENT_TYPE)
                         .appendEncodedPath(id)
                         .appendEncodedPath(API_REVIEW)
                         .appendQueryParameter(API_KEY_PARAM, BuildConfig.THE_MOVIE_DB_API_KEY)
                         .build();
-
                 reviewURL = new URL(reviewUri.toString());
 
-                //temp
                 String reviewJsonStr = getJSONStr(reviewURL);
-                movieValues.put(MovieContract.Columns.REVIEWS, reviewJsonStr);
+                byte[] reviewByteArray = parseReviewJSON(reviewJsonStr);
+                movieValues.put(MovieContract.Columns.REVIEWS, reviewByteArray);
 
                 cVVector.add(movieValues);
             }
@@ -354,9 +351,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             return null;
         }
 
-//        Log.v(LOG_TAG, "JSOM: " + trailerJsonStr);
-//        ByteArrayOutputStream byteStream = null;
-//        ObjectOutputStream objectStream = null;
         try {
             JSONObject trailerDataJson = new JSONObject(trailerJsonStr);
             JSONArray trailerDataArray = trailerDataJson.getJSONArray(MOVIE_DB_RESULTS);
@@ -382,14 +376,41 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
                 trailerMap.put(trailerName, trailerURL);
             }
-
-//            //if this works, will make serialize class
-//            byteStream = new ByteArrayOutputStream();
-//            objectStream = new ObjectOutputStream(byteStream);
-//            objectStream.writeObject(trailerMap);
-//            return byteStream.toByteArray();
             return Serializer.serialize(trailerMap);
         } catch (JSONException | IOException e) {
+            Log.e(LOG_TAG, e.getMessage());
+        }
+        return null;
+    }
+
+    private byte[] parseReviewJSON(String reviewJsonStr) {
+        final String MOVIE_DB_RESULTS = "results";
+        final String MOVIE_DB_AUTHOR = "author";
+        final String MOVIE_DB_CONTENT = "content";
+
+        if (reviewJsonStr == null) {
+            Log.e(LOG_TAG, "No review json str");
+            return null;
+        }
+
+        try {
+            JSONObject reviewDataJson = new JSONObject(reviewJsonStr);
+            JSONArray reviewDataArray = reviewDataJson.getJSONArray(MOVIE_DB_RESULTS);
+
+            int numReviews = reviewDataArray.length();
+            //listedhashmap? or other type
+            HashMap<String, String> reviewMap = new HashMap<>();
+
+            for (int i = 0; i < numReviews; i++) {
+                JSONObject reviewObject = reviewDataArray.getJSONObject(i);
+
+                String author = reviewObject.getString(MOVIE_DB_AUTHOR);
+                String content = reviewObject.getString(MOVIE_DB_CONTENT);
+
+                reviewMap.put(author, content);
+            }
+            return Serializer.serialize(reviewMap);
+        } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage());
         }
         return null;
