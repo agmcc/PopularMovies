@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:id="@+id/detail_movie_title"
+        android:text="Title"
+        android:textSize="48sp"
+        android:gravity="center_vertical"
+        android:background="@color/colorAccent"
+        android:textColor="@color/primary_text_material_light"
+        android:padding="16dp"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/detail_movie_poster"
+            android:src="@mipmap/ic_launcher"
+            android:paddingRight="32dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/detail_movie_poster"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/detail_movie_date"
+                android:text="2015"
+                android:textSize="22dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/detail_movie_length"
+                android:text="120 mins"
+                android:textSize="18dp"
+                android:textStyle="italic"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/detail_movie_rating"
+                android:text="8.5"/>
+
+            <Switch
+                android:layout_width="150dp"
+                android:layout_height="20dp"
+                android:text="Favourited" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/detail_movie_summary"
+        android:text="summary"
+        android:padding="16dp"/>
+
+</LinearLayout>
+
+</android.support.v7.widget.CardView>
