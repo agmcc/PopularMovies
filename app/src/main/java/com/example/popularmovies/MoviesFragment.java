@@ -162,7 +162,7 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         final String[] projection = {
                 sortTable + "." + sortId,
-                Columns.POSTER_THUMB
+                Columns.POSTER
         };
 
         return new CursorLoader(getActivity(),

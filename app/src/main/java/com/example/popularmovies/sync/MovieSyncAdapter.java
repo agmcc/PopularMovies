@@ -252,8 +252,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         final String MOVIE_DB_VOTE = "vote_average";
 
         final String POSTER_BASE_URL = "https://image.tmdb.org/t/p";
-        final String POSTER_THUMB_SIZE = "w185";
-        final String POSTER_FULL_SIZE = "w780";
+        final String POSTER_SIZE = "w342";
 
         try {
             JSONObject movieDataJson = new JSONObject(movieDataJsonStr);
@@ -267,27 +266,20 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 JSONObject movieObject = movieDataArray.getJSONObject(i);
 
                 String poster_thumb = Uri.parse(POSTER_BASE_URL).buildUpon()
-                        .appendEncodedPath(POSTER_THUMB_SIZE)
-                        .appendEncodedPath(movieObject.getString(MOVIE_DB_POSTER))
-                        .build()
-                        .toString();
-
-                String poster_full = Uri.parse(POSTER_BASE_URL).buildUpon()
-                        .appendEncodedPath(POSTER_FULL_SIZE)
+                        .appendEncodedPath(POSTER_SIZE)
                         .appendEncodedPath(movieObject.getString(MOVIE_DB_POSTER))
                         .build()
                         .toString();
 
                 String summary = movieObject.getString(MOVIE_DB_OVERVIEW);
-                String date = movieObject.getString(MOVIE_DB_DATE);
+                int date = movieObject.getInt(MOVIE_DB_DATE);
                 String id = movieObject.getString(MOVIE_DB_ID);
                 String title = movieObject.getString(MOVIE_DB_TITLE);
                 String rating = movieObject.getString(MOVIE_DB_VOTE);
 
                 ContentValues movieValues = new ContentValues();
 
-                movieValues.put(MovieContract.Columns.POSTER_THUMB, poster_thumb);
-                movieValues.put(MovieContract.Columns.POSTER_FULL, poster_full);
+                movieValues.put(MovieContract.Columns.POSTER, poster_thumb);
                 movieValues.put(MovieContract.Columns.SUMMARY, summary);
                 movieValues.put(MovieContract.Columns.DATE, date);
                 movieValues.put(MovieContract.Columns.TITLE, title);
@@ -510,7 +502,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 //
 //                ContentValues movieValues = new ContentValues();
 //
-//                movieValues.put(MovieContract.Columns.POSTER_THUMB, poster_thumb);
+//                movieValues.put(MovieContract.Columns.POSTER, poster_thumb);
 //                movieValues.put(MovieContract.Columns.POSTER_FULL, poster_full);
 //                movieValues.put(MovieContract.Columns.SUMMARY, summary);
 //                movieValues.put(MovieContract.Columns.DATE, date);

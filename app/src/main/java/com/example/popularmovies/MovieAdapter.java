@@ -18,20 +18,17 @@ public class MovieAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-//        ImageView view = new SquaredImageView(context);
         ImageView view = new ImageView(context);
         view.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//        view.setScaleType(ImageView.ScaleType.FIT_CENTER);
         return view;
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        //use projection
         String url = cursor.getString(
-                cursor.getColumnIndex(MovieContract.Columns.POSTER_THUMB));
-//        Picasso.with(context).setIndicatorsEnabled(true);
-        Picasso.with(context).load(url)
+                cursor.getColumnIndex(MovieContract.Columns.POSTER));
+        Picasso.with(context)
+                .load(url)
                 .placeholder(R.drawable.black_square)
                 .into((ImageView) view);
     }

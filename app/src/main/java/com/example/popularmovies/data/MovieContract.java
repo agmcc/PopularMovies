@@ -24,8 +24,7 @@ public class MovieContract {
     }
 
     public static final class Columns {
-        public static final String POSTER_THUMB = "poster_thumb";
-        public static final String POSTER_FULL = "poster_full";
+        public static final String POSTER = "poster_thumb";
         public static final String SUMMARY = "summary";
         public static final String DATE = "date";
         public static final String TITLE = "title";
@@ -81,32 +80,5 @@ public class MovieContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
     }
-//
-//    public static final class TrailersEntry implements BaseColumns {
-//        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-//                .appendPath(PATH_TRAILERS).build();
-//
-//        public static final String CONTENT_TYPE = getContentDirType(PATH_TRAILERS);
-//        public static final String CONTENT_ITEM_TYPE = getContentItemType(PATH_TRAILERS);
-//
-//        public static final String TABLE_NAME = "trailers";
-//
-//        public static Uri buildTrailersUri(long id) {
-//            return ContentUris.withAppendedId(CONTENT_URI, id);
-//        }
-//    }
-//
-//    public static final class ReviewsEntry implements BaseColumns {
-//        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
-//                .appendPath(PATH_REVIEWS).build();
-//
-//        public static final String CONTENT_TYPE = getContentDirType(PATH_REVIEWS);
-//        public static final String CONTENT_ITEM_TYPE = getContentItemType(PATH_REVIEWS);
-//
-//        public static final String TABLE_NAME = "reviews";
-//
-//        public static Uri buildReviewsUri(long id) {
-//            return ContentUris.withAppendedId(CONTENT_URI, id);
-//        }
-//    }
+
 }

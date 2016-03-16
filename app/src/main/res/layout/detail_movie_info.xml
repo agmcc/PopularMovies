@@ -62,15 +62,6 @@
                     android:textAppearance="?android:textAppearanceMediumInverse" />
 
                 <TextView
-                    android:id="@+id/detail_movie_length"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingBottom="4dp"
-                    android:text="120 mins"
-                    android:textAppearance="?android:textAppearanceMediumInverse"
-                    android:textStyle="italic" />
-
-                <TextView
                     android:id="@+id/detail_movie_rating"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -1,8 +1,11 @@
 package com.example.popularmovies;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,10 +30,10 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
     private Cursor mCursor;
     private int trailerCount = 0;
     private int reviewCount = 0;
-    private HashMap<String, URL> trailerMap;
+    public static HashMap<String, URL> trailerMap;
     private HashMap<String, String> reviewMap;
-    private Context mContext;
-    private int trailerOffsetInd = 0;
+    public static Context mContext;
+    public static int trailerOffsetInd = 0;
     private int reviewOffsetInd = 0;
 
     public DetailAdapter(Cursor cursor, Context context) {
@@ -114,7 +117,10 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
                         . centerInside()
                         .into(holder.poster);
                 holder.title.setText(mCursor.getString(Indices.title));
-                holder.date.setText(mCursor.getString(Indices.date));
+
+                holder.date.setText(Integer.toString(
+                        mCursor.getInt(Indices.date)
+                ));
                 holder.rating.setText(mCursor.getString(Indices.rating));
                 holder.summary.setText(mCursor.getString(Indices.summary));
                 break;
@@ -135,7 +141,8 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
         return INFO_COUNT + reviewCount + trailerCount;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder
+    implements View.OnClickListener{
 
         public ImageView poster;
         public TextView title;
@@ -148,6 +155,8 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
 
         public ViewHolder(View v) {
             super(v);
+            v.setClickable(true);
+            v.setOnClickListener(this);
             poster = (ImageView) v.findViewById(R.id.detail_movie_poster);
             title = (TextView) v.findViewById(R.id.detail_movie_title);
             date = (TextView) v.findViewById(R.id.detail_movie_date);
@@ -156,6 +165,18 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
             trailer = (TextView) v.findViewById(R.id.detail_trailer);
             author = (TextView) v.findViewById(R.id.detail_author);
             review = (TextView) v.findViewById(R.id.detail_review);
+        }
+
+        @Override
+        public void onClick(View v) {
+            int type = getItemViewType();
+            Log.i(LOG_TAG, "Pos: " + getAdapterPosition() + " , type: " + type);
+            if(type == TRAILER){
+                URL clickURL = (URL)DetailAdapter.trailerMap.values().toArray()[getAdapterPosition()- trailerOffsetInd];
+                Log.i(LOG_TAG, "ARRAY url: " + clickURL.toString());
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickURL.toString()));
+                DetailAdapter.mContext.startActivity(intent);
+            }
         }
     }
 }

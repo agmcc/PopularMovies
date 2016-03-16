@@ -21,8 +21,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         final String SQL_COLUMNS_STUB =
-                Columns.POSTER_THUMB + " TEXT NOT NULL, " +
-                Columns.POSTER_FULL + " TEXT NOT NULL, " +
+                Columns.POSTER + " TEXT NOT NULL, " +
                 Columns.SUMMARY + " TEXT NOT NULL, " +
                 Columns.DATE + " INTEGER NOT NULL, " +
                 Columns.TITLE + " TEXT NOT NULL, " +

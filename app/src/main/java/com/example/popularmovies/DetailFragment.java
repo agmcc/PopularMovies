@@ -71,7 +71,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         final String[] projection = {
                 columnId,
-                Columns.POSTER_THUMB,
+                Columns.POSTER,
                 Columns.TITLE,
                 Columns.DATE,
                 Columns.RATING,
