@@ -61,6 +61,7 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        //sometimes null pointer exception
         outState.putInt(SPINNER_POS, mSpinner.getSelectedItemPosition());
     }
 

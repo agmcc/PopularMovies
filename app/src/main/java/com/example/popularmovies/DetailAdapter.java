@@ -6,77 +6,154 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.popularmovies.DetailFragment.Indices;
 import com.example.popularmovies.data.Serializer;
+import com.squareup.picasso.Picasso;
 
+import java.net.URL;
 import java.util.HashMap;
 
 public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder> {
 
-    public CursorAdapter mCursorAdapter;
+    private static final String LOG_TAG = DetailAdapter.class.getSimpleName();
+
+    private static final int INFO_COUNT = 1;
+    private static final int INFO = 0;
+    private static final int TRAILER = 1;
+    private static final int REVIEW = 2;
+    private Cursor mCursor;
+    private int trailerCount = 0;
+    private int reviewCount = 0;
+    private HashMap<String, URL> trailerMap;
+    private HashMap<String, String> reviewMap;
     private Context mContext;
+    private int trailerOffsetInd = 0;
+    private int reviewOffsetInd = 0;
 
-    //Dataset goes here- will test with reviews
-    public DetailAdapter(Context context, Cursor cursor) {
+    public DetailAdapter(Cursor cursor, Context context) {
+        mCursor = cursor;
         mContext = context;
-        mCursorAdapter = new CursorAdapter(mContext, cursor, 0) {
-            @Override
-            public View newView(Context context, Cursor cursor, ViewGroup parent) {
-                //here use method to decide which view to use (movie card, review card, trailer card)
-                return LayoutInflater.from(context)
-                        .inflate(R.layout.detail_recycler_item, parent, false);
-            }
-
-            @Override
-            public void bindView(View view, Context context, Cursor cursor) {
-                //then also decide what to put into view
-                if (cursor != null) {
-                    byte[] reviewBytes = cursor.getBlob(DetailFragment.ColumnIndices.reviewsInd);
-                    HashMap<String, String> reviewMap =
-                            (HashMap<String, String>) Serializer.deserialize(reviewBytes);
-
-                    String author = (String) reviewMap.keySet().toArray()[cursor.getPosition()];
-                    String content = (String) reviewMap.values().toArray()[cursor.getPosition()];
-
-                    ViewHolder holder = (ViewHolder) view.getTag();
-                    holder.author_text.setText(author);
-                    holder.content_text.setText(content);
+        if (mCursor != null) {
+            if (mCursor.moveToFirst()) {
+                byte[] trailerBytes = mCursor.getBlob(Indices.trailers);
+                if (trailerBytes != null) {
+                    trailerMap = (HashMap<String, URL>) Serializer.deserialize(trailerBytes);
+                    trailerCount = trailerMap.values().size();
+                }
+                byte[] reviewBytes = mCursor.getBlob(Indices.reviews);
+                if (reviewBytes != null) {
+                    reviewMap = (HashMap<String, String>) Serializer.deserialize(reviewBytes);
+                    reviewCount = reviewMap.values().size();
                 }
             }
-        };
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position == 0)
+            return INFO;
+
+        if (trailerCount > 0 && reviewCount > 0) {
+            trailerOffsetInd = 1;
+            reviewOffsetInd = trailerCount + 1;
+            if (position > 0 && position < trailerCount + 1)
+                return TRAILER;
+            else if (position > trailerCount)
+                return REVIEW;
+        } else if (trailerCount > 0) {
+            trailerOffsetInd = 1;
+            if (position > 0)
+                return TRAILER;
+        } else if (reviewCount > 0) {
+            reviewOffsetInd = 1;
+            if (position > 0)
+                return REVIEW;
+        }
+        return 0;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = mCursorAdapter.newView(mContext, mCursorAdapter.getCursor(), parent);
-        return new ViewHolder(view);
+
+        int layoutId;
+        switch (viewType) {
+            case INFO:
+                layoutId = R.layout.detail_movie_info;
+                break;
+            case TRAILER:
+                layoutId = R.layout.detail_movie_trailer;
+                break;
+            case REVIEW:
+                layoutId = R.layout.detail_movie_review;
+                break;
+            default:
+                layoutId = 0;
+        }
+
+        View v = LayoutInflater.from(parent.getContext())
+                .inflate(layoutId, parent, false);
+        return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        mCursorAdapter.getCursor().moveToPosition(position);
-        View view = holder.itemView;
-        view.setTag(holder);
-        mCursorAdapter.bindView(view, mContext, mCursorAdapter.getCursor());
+        if (mCursor == null)
+            return;
+        if (!mCursor.moveToFirst())
+            return;
+
+        switch (getItemViewType(position)) {
+            case INFO:
+                Picasso.with(mContext).load(mCursor.getString(Indices.poster))
+                        .placeholder(R.drawable.black_square)
+                        .into(holder.poster);
+                holder.title.setText(mCursor.getString(Indices.title));
+                holder.date.setText(mCursor.getString(Indices.date));
+                holder.rating.setText(mCursor.getString(Indices.rating));
+                holder.summary.setText(mCursor.getString(Indices.summary));
+                break;
+            case TRAILER:
+                holder.trailer.setText((String) trailerMap.keySet().toArray()[position - trailerOffsetInd]);
+                break;
+            case REVIEW:
+                holder.author.setText((String) reviewMap.keySet().toArray()[position - reviewOffsetInd]);
+                holder.review.setText((String) reviewMap.values().toArray()[position - reviewOffsetInd]);
+                break;
+            default:
+                throw new UnsupportedOperationException("No matching items");
+        }
     }
 
     @Override
     public int getItemCount() {
-        return mCursorAdapter.getCount();
+        return INFO_COUNT + reviewCount + trailerCount;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView author_text;
-        public TextView content_text;
+        public ImageView poster;
+        public TextView title;
+        public TextView date;
+        public TextView rating;
+        public TextView summary;
+        public TextView trailer;
+        public TextView author;
+        public TextView review;
 
         public ViewHolder(View v) {
             super(v);
-            author_text = (TextView) v.findViewById(R.id.cardview_author);
-            content_text = (TextView) v.findViewById(R.id.cardview_content);
+            poster = (ImageView) v.findViewById(R.id.detail_movie_poster);
+            title = (TextView) v.findViewById(R.id.detail_movie_title);
+            date = (TextView) v.findViewById(R.id.detail_movie_date);
+            rating = (TextView) v.findViewById(R.id.detail_movie_rating);
+            summary = (TextView) v.findViewById(R.id.detail_movie_summary);
+            trailer = (TextView) v.findViewById(R.id.detail_trailer);
+            author = (TextView) v.findViewById(R.id.detail_author);
+            review = (TextView) v.findViewById(R.id.detail_review);
         }
     }
-
 }

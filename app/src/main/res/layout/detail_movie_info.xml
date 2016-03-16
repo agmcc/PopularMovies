@@ -59,10 +59,10 @@
                 android:id="@+id/detail_movie_rating"
                 android:text="8.5"/>
 
-            <Switch
-                android:layout_width="150dp"
-                android:layout_height="20dp"
-                android:text="Favourited" />
+            <!--<Switch-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="Favourited" />-->
 
         </LinearLayout>
 
