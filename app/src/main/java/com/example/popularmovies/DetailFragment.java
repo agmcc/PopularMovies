@@ -89,58 +89,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-//        DetailViewHolder viewHolder = (DetailViewHolder) getView().getTag();
-//
-//        final int poster = 0;
-//        final int title = 1;
-//        final int date = 2;
-//        final int rating = 3;
-//        final int summary = 4;
-//        final int trailers = 5;
-//        final int reviews = 6;
-
-//        if (cursor != null) {
-//            if (cursor.moveToFirst()) {
-//                Picasso.with(getContext())
-//                        .load(cursor.getString(poster))
-//                        .into(viewHolder.imageView);
-//
-//                viewHolder.title.setText(cursor.getString(title));
-//                viewHolder.date.setText(cursor.getString(date));
-//                viewHolder.rating.setText(cursor.getString(rating));
-//                viewHolder.summary.setText(cursor.getString(summary));
-//
-//                byte[] trailerByteArray = cursor.getBlob(trailers);
-//                HashMap<String, URL> trailerMap =
-//                        (HashMap<String, URL>) Serializer.deserialize(trailerByteArray);
-
-        //Temp- will feed into recycler view
-//                StringBuilder trailerBuilder = new StringBuilder("*\tTrailers\t*\n\n");
-//
-//                for (String key : trailerMap.keySet()) {
-//                    for (URL value : trailerMap.values()) {
-//                        trailerBuilder.append("[" + key + "]\n" + value.toString() + "\n\n");
-//                    }
-//                }
-//                viewHolder.trailer.setText(trailerBuilder.toString());
-
-//                byte[] reviewBytes = cursor.getBlob(reviews);
-//                HashMap<String,String> reviewMap =
-//                        (HashMap<String,String>)Serializer.deserialize(reviewBytes);
-
-//                StringBuilder reviewBuilder = new StringBuilder("*\tReviews\t*\n\n");
-//                for (String key : reviewMap.keySet()) {
-//                    for (String value : reviewMap.values()) {
-//                        reviewBuilder.append("[" + key + "]\n" + value.toString() + "\n\n");
-//                    }
-//                }
-//
-//                viewHolder.review.setText(reviewBuilder.toString());
-//temp
-//                mRecyclerAdapter = new DetailAdapter(reviewMap);
-//                mRecyclerView.setAdapter(mRecyclerAdapter);
-//            }
-//        }
         mRecyclerView.setAdapter(new DetailAdapter(cursor, getActivity()));
     }
 

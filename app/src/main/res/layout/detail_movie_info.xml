@@ -1,80 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent">
 
-<LinearLayout
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="2dp"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
+    android:layout_marginTop="2dp"
+    android:minHeight="?android:attr/listPreferredItemHeight"
+    card_view:cardBackgroundColor="@color/colorAccent"
+    card_view:cardCornerRadius="4dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:id="@+id/detail_movie_title"
-        android:text="Title"
-        android:textSize="48sp"
-        android:gravity="center_vertical"
-        android:background="@color/colorAccent"
-        android:textColor="@color/primary_text_material_light"
-        android:padding="16dp"/>
-
-    <RelativeLayout
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:background="@color/colorBackground"
+        android:orientation="vertical">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/detail_movie_poster"
-            android:src="@mipmap/ic_launcher"
-            android:paddingRight="32dp"/>
+        <TextView
+            android:id="@+id/detail_movie_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorAccent"
+            android:gravity="center_vertical"
+            android:minHeight="112dp"
+            android:paddingBottom="8dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:text="Title"
+            android:textAppearance="?android:textAppearanceLarge"
+            android:textColor="@color/primary_text_material_light"
+            android:textSize="28sp" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/detail_movie_poster"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:paddingBottom="8dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="8dp">
 
-            <TextView
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/detail_movie_poster"
+                android:layout_width="120dp"
+                android:layout_height="180dp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/detail_movie_date"
-                android:text="2015"
-                android:textSize="22dp"/>
+                android:orientation="vertical"
+                android:paddingLeft="16dp">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/detail_movie_length"
-                android:text="120 mins"
-                android:textSize="18dp"
-                android:textStyle="italic"/>
+                <TextView
+                    android:id="@+id/detail_movie_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="4dp"
+                    android:text="2015"
+                    android:textAppearance="?android:textAppearanceMediumInverse" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/detail_movie_rating"
-                android:text="8.5"/>
+                <TextView
+                    android:id="@+id/detail_movie_length"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="4dp"
+                    android:text="120 mins"
+                    android:textAppearance="?android:textAppearanceMediumInverse"
+                    android:textStyle="italic" />
 
-            <!--<Switch-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:text="Favourited" />-->
+                <TextView
+                    android:id="@+id/detail_movie_rating"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="4dp"
+                    android:text="8.5"
+                    android:textAppearance="?android:textAppearanceSmallInverse" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </RelativeLayout>
+        <TextView
+            android:id="@+id/detail_movie_summary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:text="summary"
+            android:textAppearance="?android:textAppearanceSmallInverse" />
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/detail_movie_summary"
-        android:text="summary"
-        android:padding="16dp"/>
-
-</LinearLayout>
+    </LinearLayout>
 
 </android.support.v7.widget.CardView>

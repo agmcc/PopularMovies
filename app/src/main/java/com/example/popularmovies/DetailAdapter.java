@@ -110,6 +110,8 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
             case INFO:
                 Picasso.with(mContext).load(mCursor.getString(Indices.poster))
                         .placeholder(R.drawable.black_square)
+                        .fit()
+                        . centerInside()
                         .into(holder.poster);
                 holder.title.setText(mCursor.getString(Indices.title));
                 holder.date.setText(mCursor.getString(Indices.date));
