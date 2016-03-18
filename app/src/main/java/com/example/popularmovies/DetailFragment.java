@@ -8,13 +8,23 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.ShareActionProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.popularmovies.data.MovieContract.Columns;
+import com.example.popularmovies.data.Serializer;
+
+import java.net.URL;
+import java.util.HashMap;
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -23,6 +33,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private RecyclerView mRecyclerView;
     private DetailAdapter mRecyclerAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    //temp - will read favourite status from db
+    private boolean favourited = false;
+    private ShareActionProvider mShareActionProvider;
+    private Cursor mCursor;
+    private static final String SHARE_MSG = " -Popular Movies\n";
 
     public DetailFragment() {
     }
@@ -46,7 +61,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 //            }
 //        });
 
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.detail_recycler_view);
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
@@ -54,9 +69,43 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.detail_menu, menu);
+        MenuItem menuItem = menu.findItem(R.id.menu_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+        if (mCursor != null)
+            mShareActionProvider.setShareIntent(createShareForecastIntent());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_favourite:
+                Log.i(LOG_TAG, "Clicked favourite");
+                favourited = !favourited;
+                if (favourited)
+                    item.setIcon(R.drawable.ic_favourite_true);
+                else
+                    item.setIcon(R.drawable.ic_favourite_false);
+                break;
+            case R.id.menu_share:
+                Log.i(LOG_TAG, "Clicked share");
+                //share movie
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -90,11 +139,31 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         mRecyclerView.setAdapter(new DetailAdapter(cursor, getActivity()));
+        mCursor = cursor;
+        if (mShareActionProvider != null)
+            mShareActionProvider.setShareIntent(createShareForecastIntent());
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-       mRecyclerView.setAdapter(new DetailAdapter(null, null));
+        mRecyclerView.setAdapter(new DetailAdapter(null, null));
+    }
+
+    private Intent createShareForecastIntent() {
+        if (mCursor.moveToFirst()) {
+            HashMap<String, URL> trailerMap = (HashMap<String, URL>) Serializer.deserialize(
+                    mCursor.getBlob(Indices.trailers));
+            if (trailerMap.values().size() > 0) {
+                String trailerName = (String)trailerMap.keySet().toArray()[0];
+                URL trailerUrl = (URL) trailerMap.values().toArray()[0];
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, trailerName + SHARE_MSG + trailerUrl.toString());
+                return shareIntent;
+            }
+        }
+        return null;
     }
 
     public class Indices {

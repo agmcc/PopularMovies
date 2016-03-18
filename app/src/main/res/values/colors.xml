@@ -6,18 +6,5 @@
     <color name="colorBackground">#ffffff</color>
     <color name="primaryText">#ffffff</color>
     <color name="primaryTextInverse">#000000</color>
-
-    <color name="primary_material_dark">#009688</color>
-    <color name="primary_dark_material_dark">#00796b</color>
-    <color name="accent_material_dark">#ff1744</color>
-    <color name="background_material_dark">#303030</color>
-    <color name="black">#000000</color>
-    <color name="primary_text_default_material_dark">#ffffff</color>
-    <color name="primary_material_light">#3f51b5</color>
-    <color name="primary_dark_material_light">#303f9f</color>
-    <color name="accent_material_light">#ff4040</color>
-    <color name="background_material_light">#fafafa</color>
-    <color name="foreground_material_light">#000000</color>
-    <color name="primary_text_default_material_light">#deffffff</color>
-    <color name="primary_text_material_light">#ffffff</color>
+    <color name="overflowColor">#c6ff00</color>
 </resources>

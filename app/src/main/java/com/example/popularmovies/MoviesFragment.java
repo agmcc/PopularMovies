@@ -10,6 +10,8 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -20,7 +22,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.GridView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -32,19 +33,23 @@ import com.example.popularmovies.data.MovieContract.RatingEntry;
 import com.example.popularmovies.sync.MovieSyncAdapter;
 
 public class MoviesFragment extends Fragment implements OnItemSelectedListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>, GridAdapter.GridItemCallback {
 
     private static final int MOVIE_LOADER = 0;
     private static final String SPINNER_POS = "spinner_pos";
+    private static final int PORTRAIT_GRID_SPAN = 3;
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
-    protected GridView gridView;
+    //    protected GridView gridView;
     private Uri sortURI = PopularityEntry.CONTENT_URI;
     private String sortTable = PopularityEntry.TABLE_NAME;
     private String sortId = PopularityEntry._ID;
-    private MovieAdapter mAdapter;
+    //    private MovieAdapter mAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private Spinner mSpinner;
     private int spinnerPos = 0;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private GridAdapter mGridAdapter;
 
     public MoviesFragment() {
     }
@@ -52,10 +57,10 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
         if (savedInstanceState != null) {
             spinnerPos = savedInstanceState.getInt(SPINNER_POS);
         }
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -67,7 +72,7 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.movies_fragment_menu, menu);
+        inflater.inflate(R.menu.main_menu, menu);
         MenuItem item = menu.findItem(R.id.spinner);
         mSpinner = (Spinner) MenuItemCompat.getActionView(item);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
@@ -115,7 +120,8 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
 
         Toast.makeText(getContext(), "Sort by " + choice, Toast.LENGTH_SHORT).show();
         getLoaderManager().restartLoader(0, null, this);
-        gridView.smoothScrollToPosition(0);
+//        gridView.smoothScrollToPosition(0);
+        mRecyclerView.smoothScrollToPosition(0);
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
@@ -126,20 +132,26 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
 
-        gridView = (GridView) rootView.findViewById(R.id.gridview);
-        mAdapter = new MovieAdapter(getActivity(), null, 0);
-        gridView.setAdapter(mAdapter);
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                //could be a method
-                String columnId = sortTable + "." + sortId;
-                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-                        .setData(MovieContract.buildUri(sortURI, position + 1))
-                        .putExtra(Intent.EXTRA_TEXT, columnId);
-                startActivity(detailIntent);
-            }
-        });
+//        gridView = (GridView) rootView.findViewById(R.id.gridview);
+//        mAdapter = new MovieAdapter(getActivity(), null, 0);
+//        gridView.setAdapter(mAdapter);
+//        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+//                //could be a method
+//                String columnId = sortTable + "." + sortId;
+//                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
+//                        .setData(MovieContract.buildUri(sortURI, position + 1))
+//                        .putExtra(Intent.EXTRA_TEXT, columnId);
+//                startActivity(detailIntent);
+//            }
+//        });
+
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movies_recycler_view);
+        mLayoutManager = new GridLayoutManager(getContext(), PORTRAIT_GRID_SPAN);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mGridAdapter = new GridAdapter(getContext(), null, this);
+        mRecyclerView.setAdapter(mGridAdapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swiperefresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -154,7 +166,7 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-            getLoaderManager().initLoader(MOVIE_LOADER, null, this);
+        getLoaderManager().initLoader(MOVIE_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -173,14 +185,24 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        mAdapter.swapCursor(cursor);
+//        mAdapter.swapCursor(cursor);
+        mGridAdapter.swapCursor(cursor);
         Log.i(LOG_TAG, "Load complete");
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
+//        mAdapter.swapCursor(null);
+        mGridAdapter.swapCursor(null);
     }
 
+    @Override
+    public void onGridItemClick(int position) {
+        String columnId = sortTable + "." + sortId;
+        Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
+                .setData(MovieContract.buildUri(sortURI, position + 1))
+                .putExtra(Intent.EXTRA_TEXT, columnId);
+        startActivity(detailIntent);
+    }
 }

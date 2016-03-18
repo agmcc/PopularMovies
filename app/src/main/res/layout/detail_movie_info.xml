@@ -30,7 +30,7 @@
             android:paddingRight="16dp"
             android:text="Title"
             android:textAppearance="?android:textAppearanceLarge"
-            android:textColor="@color/primary_text_material_light"
+            android:textColor="@color/primaryText"
             android:textSize="28sp" />
 
         <LinearLayout

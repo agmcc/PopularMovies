@@ -3,24 +3,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <GridView
-        android:id="@+id/gridview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:columnWidth="130dp"
-        android:numColumns="auto_fit"
-        android:stretchMode="columnWidth">
-    </GridView>
-
     <!--<GridView-->
         <!--android:id="@+id/gridview"-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="match_parent"-->
-        <!--android:layout_gravity="center"-->
-        <!--android:columnWidth="@dimen/grid_col_width"-->
-        <!--android:horizontalSpacing="@dimen/grid_spacing"-->
+        <!--android:columnWidth="130dp"-->
         <!--android:numColumns="auto_fit"-->
-        <!--android:stretchMode="spacingWidthUniform"-->
-        <!--android:verticalSpacing="@dimen/grid_spacing"></GridView>-->
+        <!--android:stretchMode="columnWidth">-->
+    <!--</GridView>-->
+
+    <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/movies_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical">
+    </android.support.v7.widget.RecyclerView>
 
 </android.support.v4.widget.SwipeRefreshLayout>
