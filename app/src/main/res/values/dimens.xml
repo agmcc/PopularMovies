@@ -2,7 +2,5 @@
     //default margin 16dp - keep that and use special margin for
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="grid_margin">0dp</dimen>
-    <dimen name="grid_spacing">0dp</dimen>
-    <dimen name="grid_col_width">130dp</dimen>
+    <dimen name="grid_column_width">140dp</dimen>
 </resources>

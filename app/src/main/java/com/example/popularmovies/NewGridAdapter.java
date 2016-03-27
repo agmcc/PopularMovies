@@ -2,34 +2,32 @@ package com.example.popularmovies;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.support.v4.widget.CursorAdapter;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CursorAdapter;
 import android.widget.ImageView;
 
-import com.example.popularmovies.data.MovieContract;
 import com.squareup.picasso.Picasso;
 
-public class MovieAdapter extends CursorAdapter {
+public class NewGridAdapter extends CursorAdapter {
 
-    public MovieAdapter(Context context, Cursor c, int flags) {
+    private static final int POSTER_INDEX = 1;
+
+    public NewGridAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        ImageView view = new ImageView(context);
-        view.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        return view;
+        ImageView imageView = new ImageView(context);
+        imageView.setAdjustViewBounds(true);
+        return imageView;
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        String url = cursor.getString(
-                cursor.getColumnIndex(MovieContract.Columns.POSTER));
         Picasso.with(context)
-                .load(url)
-                .placeholder(R.drawable.black_square)
+                .load(cursor.getString(POSTER_INDEX))
                 .into((ImageView) view);
     }
 }

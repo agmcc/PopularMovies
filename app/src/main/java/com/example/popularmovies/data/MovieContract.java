@@ -44,9 +44,9 @@ public class MovieContract {
 
         public static final String TABLE_NAME = "popularity";
 
-        public static Uri buildPopularityUri(long id) {
-            return ContentUris.withAppendedId(CONTENT_URI, id);
-        }
+//        public static Uri buildPopularityUri(long id) {
+//            return ContentUris.withAppendedId(CONTENT_URI, id);
+//        }
     }
 
     public static final class RatingEntry implements BaseColumns {
@@ -60,9 +60,9 @@ public class MovieContract {
 
         public static final String TABLE_NAME = "rating";
 
-        public static Uri buildRatingUri(long id) {
-            return ContentUris.withAppendedId(CONTENT_URI, id);
-        }
+//        public static Uri buildRatingUri(long id) {
+//            return ContentUris.withAppendedId(CONTENT_URI, id);
+//        }
     }
 
     public static final class FavouritesEntry implements BaseColumns {
@@ -76,9 +76,9 @@ public class MovieContract {
 
         public static final String TABLE_NAME = "favourites";
 
-        public static Uri buildFavouritesUri(long id) {
-            return ContentUris.withAppendedId(CONTENT_URI, id);
-        }
+//        public static Uri buildFavouritesUri(long id) {
+//            return ContentUris.withAppendedId(CONTENT_URI, id);
+//        }
     }
 
 }

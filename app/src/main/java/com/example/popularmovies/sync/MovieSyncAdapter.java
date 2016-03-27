@@ -17,6 +17,8 @@ import android.util.Log;
 import com.example.popularmovies.BuildConfig;
 import com.example.popularmovies.R;
 import com.example.popularmovies.data.MovieContract;
+import com.example.popularmovies.data.MovieContract.PopularityEntry;
+import com.example.popularmovies.data.MovieContract.RatingEntry;
 import com.example.popularmovies.data.Serializer;
 
 import org.json.JSONArray;
@@ -64,13 +66,13 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         //review: http://api.themoviedb.org/3/movie/293660/reviews?api_key=2e19e8fc023dd86dee79eb6b406fcd43
         results json: results array, id author content url objects - want author and content
      */
+    public static final String LOG_TAG = MovieSyncAdapter.class.getSimpleName();
 
     //// TODO: 12/03/2016 settings menu with sync frequency
     public static final int SYNC_INTERVAL = 60 * 180; //seconds
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
-    public static final String LOG_TAG = MovieSyncAdapter.class.getSimpleName();
-    private static final String POPULAR = "popular";
-    private static final String RATING = "top_rated";
+//    private static final String POPULAR = "popular";
+//    private static final String RATING = "top_rated";
 
     public MovieSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -136,10 +138,10 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         String sortMode = null;
 
         if (contentUri.equals(MovieContract.PopularityEntry.CONTENT_URI)) {
-            Log.v(LOG_TAG, "Sorting by popularity");
+//            Log.v(LOG_TAG, "Sorting by popularity");
             sortMode = API_SORT_POPULARITY;
         } else if (contentUri.equals(MovieContract.RatingEntry.CONTENT_URI)) {
-            Log.v(LOG_TAG, "Sorting by rating");
+//            Log.v(LOG_TAG, "Sorting by rating");
             sortMode = API_SORT_RATING;
         } else
             throw new UnsupportedOperationException("Unknown sortMode: " + sortMode);
@@ -163,19 +165,17 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
         String moviesJsonStr = getJSONStr(movieUrl);
-
-        if (moviesJsonStr != null) {
+        //todo check parseMovieJson and linked methods - ok up to here
+        if (moviesJsonStr != null)
             parseMovieJSON(moviesJsonStr, contentUri);
-        } else {
-            Log.e(LOG_TAG, "Unable to fetch JSON data");
-            return;
-        }
+        else
+            Log.w(LOG_TAG, "Unable to fetch JSON data");
     }
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        getMovieData(MovieContract.PopularityEntry.CONTENT_URI);
-        getMovieData(MovieContract.RatingEntry.CONTENT_URI);
+        getMovieData(PopularityEntry.CONTENT_URI);
+        getMovieData(RatingEntry.CONTENT_URI);
 //      Log.d(LOG_TAG, "onPerformSync");
 //
 //        HttpURLConnection urlConnection = null;
@@ -242,6 +242,52 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 //        }
     }
 
+    private String getJSONStr(URL url) {
+        HttpURLConnection urlConnection = null;
+        BufferedReader reader = null;
+        String jsonStr = null;
+
+        try {
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
+
+            InputStream inputStream = urlConnection.getInputStream();
+            StringBuffer buffer = new StringBuffer();
+
+            if (inputStream == null)
+                return null;
+
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                buffer.append(line + "\n");
+            }
+
+            if (buffer.length() == 0)
+                return null;
+
+            jsonStr = buffer.toString();
+//            Log.v(LOG_TAG, "JSON String: " + jsonStr);
+//            return jsonStr;
+
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Error", e);
+        } finally {
+            if (urlConnection != null)
+                urlConnection.disconnect();
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    Log.e(LOG_TAG, "Error closing stream", e);
+                }
+            }
+        }
+        return jsonStr;
+    }
+
     private void parseMovieJSON(String movieDataJsonStr, Uri contentUri) {
         final String MOVIE_DB_RESULTS = "results";
         final String MOVIE_DB_POSTER = "poster_path";
@@ -252,8 +298,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         final String MOVIE_DB_VOTE = "vote_average";
 
         final String POSTER_BASE_URL = "https://image.tmdb.org/t/p";
-        final String POSTER_SIZE = "w342";
-
+        final String POSTER_SIZE = "w342"; //   w185,w342,w500
         try {
             JSONObject movieDataJson = new JSONObject(movieDataJsonStr);
             JSONArray movieDataArray = movieDataJson.getJSONArray(MOVIE_DB_RESULTS);
@@ -265,21 +310,21 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             for (int i = 0; i < numMovies; i++) {
                 JSONObject movieObject = movieDataArray.getJSONObject(i);
 
-                String poster_thumb = Uri.parse(POSTER_BASE_URL).buildUpon()
+                String poster = Uri.parse(POSTER_BASE_URL).buildUpon()
                         .appendEncodedPath(POSTER_SIZE)
                         .appendEncodedPath(movieObject.getString(MOVIE_DB_POSTER))
                         .build()
                         .toString();
 
                 String summary = movieObject.getString(MOVIE_DB_OVERVIEW);
-                int date = movieObject.getInt(MOVIE_DB_DATE);
+                String date = movieObject.getString(MOVIE_DB_DATE);
                 String id = movieObject.getString(MOVIE_DB_ID);
                 String title = movieObject.getString(MOVIE_DB_TITLE);
                 String rating = movieObject.getString(MOVIE_DB_VOTE);
 
                 ContentValues movieValues = new ContentValues();
 
-                movieValues.put(MovieContract.Columns.POSTER, poster_thumb);
+                movieValues.put(MovieContract.Columns.POSTER, poster);
                 movieValues.put(MovieContract.Columns.SUMMARY, summary);
                 movieValues.put(MovieContract.Columns.DATE, date);
                 movieValues.put(MovieContract.Columns.TITLE, title);
@@ -290,33 +335,36 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 final String API_TRAILER = "videos";
                 final String API_KEY_PARAM = "api_key";
 
-                URL trailerUrl;
+//                URL trailerUrl;
                 Uri trailerUri = Uri.parse(MOVIE_DB_BASE_URL).buildUpon()
                         .appendEncodedPath(CONTENT_TYPE)
                         .appendEncodedPath(id)
                         .appendEncodedPath(API_TRAILER)
                         .appendQueryParameter(API_KEY_PARAM, BuildConfig.THE_MOVIE_DB_API_KEY)
                         .build();
-                trailerUrl = new URL(trailerUri.toString());
+                URL trailerUrl = new URL(trailerUri.toString());
 
                 String trailerJsonStr = getJSONStr(trailerUrl);
-                byte[] trailerByteArray = parseTrailerJSON(trailerJsonStr);
-                movieValues.put(MovieContract.Columns.TRAILERS, trailerByteArray);
+                if (trailerJsonStr != null) {
+                    byte[] trailerByteArray = parseTrailerJSON(trailerJsonStr);
+                    movieValues.put(MovieContract.Columns.TRAILERS, trailerByteArray);
+                }
 
                 final String API_REVIEW = "reviews";
 
-                URL reviewURL;
                 Uri reviewUri = Uri.parse(MOVIE_DB_BASE_URL).buildUpon()
                         .appendEncodedPath(CONTENT_TYPE)
                         .appendEncodedPath(id)
                         .appendEncodedPath(API_REVIEW)
                         .appendQueryParameter(API_KEY_PARAM, BuildConfig.THE_MOVIE_DB_API_KEY)
                         .build();
-                reviewURL = new URL(reviewUri.toString());
+                URL reviewURL = new URL(reviewUri.toString());
 
                 String reviewJsonStr = getJSONStr(reviewURL);
-                byte[] reviewByteArray = parseReviewJSON(reviewJsonStr);
-                movieValues.put(MovieContract.Columns.REVIEWS, reviewByteArray);
+                if (reviewJsonStr != null) {
+                    byte[] reviewByteArray = parseReviewJSON(reviewJsonStr);
+                    movieValues.put(MovieContract.Columns.REVIEWS, reviewByteArray);
+                }
 
                 cVVector.add(movieValues);
             }
@@ -337,11 +385,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         final String MOVIE_DB_RESULTS = "results";
         final String MOVIE_DB_KEY = "key";
         final String MOVIE_DB_NAME = "name";
-
-        if (trailerJsonStr == null) {
-            Log.e(LOG_TAG, "No trailer json str");
-            return null;
-        }
 
         try {
             JSONObject trailerDataJson = new JSONObject(trailerJsonStr);
@@ -375,15 +418,40 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         return null;
     }
 
+//    private <K, V> byte[] parseArrayToMap(String jsonStr, final String MOVIE_DB_KEY, final String MOVIE_DB_VALUE) {
+//
+//        final String MOVIE_DB_RESULTS = "results";
+//
+//        try {
+//            JSONObject jsonObj = new JSONObject(jsonStr);
+//            JSONArray dataArray = jsonObj.getJSONArray(MOVIE_DB_RESULTS);
+//
+//            int numEntries = dataArray.length();
+//
+//            HashMap<String, String> reviewMap = new HashMap<>();
+//
+//            for (int i = 0; i < numEntries; i++) {
+//                JSONObject entryObj = dataArray.getJSONObject(i);
+//
+//                K key = entryObj.getString(MOVIE_DB_KEY);
+//                String author = reviewObject.getString(MOVIE_DB_AUTHOR);
+//                String content = reviewObject.getString(MOVIE_DB_CONTENT);
+//
+//                reviewMap.put(author, content);
+//            }
+//            return Serializer.serialize(reviewMap);
+//        } catch (JSONException e) {
+//            Log.e(LOG_TAG, e.getMessage());
+//        }
+//
+//        return null;
+//    }
+
+    //these methods are nearly identical - could have a "parseMap<Type,Type>(String key, String value)
     private byte[] parseReviewJSON(String reviewJsonStr) {
         final String MOVIE_DB_RESULTS = "results";
         final String MOVIE_DB_AUTHOR = "author";
         final String MOVIE_DB_CONTENT = "content";
-
-        if (reviewJsonStr == null) {
-            Log.e(LOG_TAG, "No review json str");
-            return null;
-        }
 
         try {
             JSONObject reviewDataJson = new JSONObject(reviewJsonStr);
@@ -408,52 +476,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         return null;
     }
 
-    private String getJSONStr(URL url) {
-        HttpURLConnection urlConnection = null;
-        BufferedReader reader = null;
-        String jsonStr;
-
-        try {
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.connect();
-
-            InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
-
-            if (inputStream == null)
-                return null;
-
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                buffer.append(line + "\n");
-            }
-
-            if (buffer.length() == 0)
-                return null;
-
-            jsonStr = buffer.toString();
-//            Log.v(LOG_TAG, "JSON String: " + jsonStr);
-            return jsonStr;
-
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Error", e);
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    Log.e(LOG_TAG, "Error closing stream", e);
-                }
-            }
-        }
-        return null;
-    }
 
 //    private void getMovieDataFromJSON(String movieDataJsonStr) throws JSONException {
 //

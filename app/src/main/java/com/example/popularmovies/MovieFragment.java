@@ -9,9 +9,8 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -31,27 +31,32 @@ import com.example.popularmovies.data.MovieContract.FavouritesEntry;
 import com.example.popularmovies.data.MovieContract.PopularityEntry;
 import com.example.popularmovies.data.MovieContract.RatingEntry;
 import com.example.popularmovies.sync.MovieSyncAdapter;
+//
+//public class MovieFragment extends Fragment implements OnItemSelectedListener,
+//        LoaderManager.LoaderCallbacks<Cursor>, GridAdapter.GridItemCallback {
 
-public class MoviesFragment extends Fragment implements OnItemSelectedListener,
-        LoaderManager.LoaderCallbacks<Cursor>, GridAdapter.GridItemCallback {
+public class MovieFragment extends Fragment
+        implements OnItemSelectedListener, MovieGridAdapter.GridItemCallback, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int MOVIE_LOADER = 0;
     private static final String SPINNER_POS = "spinner_pos";
-    private static final int PORTRAIT_GRID_SPAN = 3;
-    private final String LOG_TAG = MoviesFragment.class.getSimpleName();
-    //    protected GridView gridView;
+//    private static final int PORTRAIT_GRID_SPAN = 3;
+    private final String LOG_TAG = MovieFragment.class.getSimpleName();
     private Uri sortURI = PopularityEntry.CONTENT_URI;
     private String sortTable = PopularityEntry.TABLE_NAME;
     private String sortId = PopularityEntry._ID;
-    //    private MovieAdapter mAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private Spinner mSpinner;
     private int spinnerPos = 0;
-    private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager mLayoutManager;
-    private GridAdapter mGridAdapter;
+    //    private AutofitRecyclerView mRecyclerView;
+//    private RecyclerView mRecyclerView;
+    //    private GridAdapter mGridAdapter;
+//    private MovieGridAdapter mGridAdapter;
+    //
+    private NewGridAdapter mNewGridAdapter;
+    private GridView mGridView;
 
-    public MoviesFragment() {
+    public MovieFragment() {
     }
 
     @Override
@@ -67,7 +72,9 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         //sometimes null pointer exception
-        outState.putInt(SPINNER_POS, mSpinner.getSelectedItemPosition());
+        if (outState != null) {
+            outState.putInt(SPINNER_POS, mSpinner.getSelectedItemPosition());
+        }
     }
 
     @Override
@@ -120,8 +127,8 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
 
         Toast.makeText(getContext(), "Sort by " + choice, Toast.LENGTH_SHORT).show();
         getLoaderManager().restartLoader(0, null, this);
-//        gridView.smoothScrollToPosition(0);
-        mRecyclerView.smoothScrollToPosition(0);
+//        mRecyclerView.smoothScrollToPosition(0);
+        mGridView.smoothScrollToPosition(0);
     }
 
     public void onNothingSelected(AdapterView<?> parent) {
@@ -132,26 +139,33 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_movies, container, false);
 
-//        gridView = (GridView) rootView.findViewById(R.id.gridview);
-//        mAdapter = new MovieAdapter(getActivity(), null, 0);
-//        gridView.setAdapter(mAdapter);
-//        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//                //could be a method
-//                String columnId = sortTable + "." + sortId;
-//                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-//                        .setData(MovieContract.buildUri(sortURI, position + 1))
-//                        .putExtra(Intent.EXTRA_TEXT, columnId);
-//                startActivity(detailIntent);
-//            }
-//        });
+//        mRecyclerView = (AutofitRecyclerView) rootView.findViewById(R.id.movies_recycler_view);
+//        mRecyclerView.setHasFixedSize(true);
+//        mGridAdapter = new GridAdapter(getContext(), null, this);
+//        mRecyclerView.setAdapter(mGridAdapter);
 
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.movies_recycler_view);
-        mLayoutManager = new GridLayoutManager(getContext(), PORTRAIT_GRID_SPAN);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mGridAdapter = new GridAdapter(getContext(), null, this);
-        mRecyclerView.setAdapter(mGridAdapter);
+//        mRecyclerView = (RecyclerView)rootView.findViewById(R.id.movies_recycler_view);
+//        LayoutManager manager = new AutoGridLayoutManager(getContext(), 1);
+//        mRecyclerView.setLayoutManager(manager);
+//        mGridAdapter = new MovieGridAdapter(getContext(), null, this);
+//        mRecyclerView.setAdapter(mGridAdapter);
+
+        //griciew
+        mGridView = (GridView) rootView.findViewById(R.id.gridview);
+        ViewCompat.setNestedScrollingEnabled(mGridView, true);
+        mNewGridAdapter = new NewGridAdapter(getContext(), null, 0);
+        mGridView.setAdapter(mNewGridAdapter);
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String columnId = sortTable + "." + sortId;
+                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
+                        .setData(MovieContract.buildUri(sortURI, position + 1))
+                        .putExtra(Intent.EXTRA_TEXT, columnId)
+                        .putExtra("Favourite", (sortURI == FavouritesEntry.CONTENT_URI));
+                startActivity(detailIntent);
+            }
+        });
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swiperefresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -177,6 +191,8 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
                 Columns.POSTER
         };
 
+//        mSwipeRefreshLayout.setRefreshing(true);
+
         return new CursorLoader(getActivity(),
                 sortURI,
                 projection,
@@ -185,16 +201,16 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-//        mAdapter.swapCursor(cursor);
-        mGridAdapter.swapCursor(cursor);
-        Log.i(LOG_TAG, "Load complete");
+        //???
+//        mRecyclerView.setAdapter(mGridAdapter);
         mSwipeRefreshLayout.setRefreshing(false);
+        mNewGridAdapter.swapCursor(cursor);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-//        mAdapter.swapCursor(null);
-        mGridAdapter.swapCursor(null);
+//        mGridAdapter.swapCursor(null);
+        mNewGridAdapter.swapCursor(null);
     }
 
     @Override
@@ -202,7 +218,8 @@ public class MoviesFragment extends Fragment implements OnItemSelectedListener,
         String columnId = sortTable + "." + sortId;
         Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
                 .setData(MovieContract.buildUri(sortURI, position + 1))
-                .putExtra(Intent.EXTRA_TEXT, columnId);
+                .putExtra(Intent.EXTRA_TEXT, columnId)
+                .putExtra("Favourite", (sortURI == FavouritesEntry.CONTENT_URI));
         startActivity(detailIntent);
     }
 }
