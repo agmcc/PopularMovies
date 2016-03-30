@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,14 +27,16 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
     private static final int INFO = 0;
     private static final int TRAILER = 1;
     private static final int REVIEW = 2;
+    public static HashMap<String, URL> trailerMap;
+    public static Context mContext;
+    public static int trailerOffsetInd = 0;
+    private static boolean mShowReviewDetails;
     private Cursor mCursor;
     private int trailerCount = 0;
     private int reviewCount = 0;
-    public static HashMap<String, URL> trailerMap;
     private HashMap<String, String> reviewMap;
-    public static Context mContext;
-    public static int trailerOffsetInd = 0;
     private int reviewOffsetInd = 0;
+    private static final int MAX_REVIEW_LINES = 3;
 
     public DetailAdapter(Cursor cursor, Context context) {
         mCursor = cursor;
@@ -103,7 +105,7 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         if (mCursor == null)
             return;
         if (!mCursor.moveToFirst())
@@ -114,7 +116,7 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
                 Picasso.with(mContext).load(mCursor.getString(Indices.poster))
                         .placeholder(R.drawable.black_square)
                         .fit()
-                        . centerInside()
+                        .centerInside()
                         .into(holder.poster);
                 holder.title.setText(mCursor.getString(Indices.title));
 
@@ -130,6 +132,19 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
             case REVIEW:
                 holder.author.setText((String) reviewMap.keySet().toArray()[position - reviewOffsetInd]);
                 holder.review.setText((String) reviewMap.values().toArray()[position - reviewOffsetInd]);
+                holder.review.post(new Runnable() {
+                    @Override
+                    public void run() {
+//                        Log.i(LOG_TAG, "Lines: " + holder.review.getLineCount());
+                        if (holder.review.getLineCount() <= MAX_REVIEW_LINES) {
+                            holder.expandImage.setVisibility(View.GONE);
+                            holder.itemView.setClickable(false);
+                        } else {
+                            holder.review.setMaxLines(MAX_REVIEW_LINES);
+                            holder.review.setEllipsize(TextUtils.TruncateAt.END);
+                        }
+                    }
+                });
                 break;
             default:
                 throw new UnsupportedOperationException("No matching items");
@@ -142,7 +157,7 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder
-    implements View.OnClickListener{
+            implements View.OnClickListener {
 
         public ImageView poster;
         public TextView title;
@@ -152,6 +167,7 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
         public TextView trailer;
         public TextView author;
         public TextView review;
+        public ImageView expandImage;
 
         public ViewHolder(View v) {
             super(v);
@@ -162,20 +178,33 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailAdapter.ViewHolder
             date = (TextView) v.findViewById(R.id.detail_movie_date);
             rating = (TextView) v.findViewById(R.id.detail_movie_rating);
             summary = (TextView) v.findViewById(R.id.detail_movie_summary);
-            trailer = (TextView) v.findViewById(R.id.detail_trailer);
+            trailer = (TextView) v.findViewById(R.id.detail_trailer_title);
             author = (TextView) v.findViewById(R.id.detail_author);
             review = (TextView) v.findViewById(R.id.detail_review);
+            expandImage = (ImageView)v.findViewById(R.id.expandReviewImage);
         }
 
         @Override
         public void onClick(View v) {
             int type = getItemViewType();
-            Log.i(LOG_TAG, "Pos: " + getAdapterPosition() + " , type: " + type);
-            if(type == TRAILER){
-                URL clickURL = (URL)DetailAdapter.trailerMap.values().toArray()[getAdapterPosition()- trailerOffsetInd];
-                Log.i(LOG_TAG, "ARRAY url: " + clickURL.toString());
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickURL.toString()));
-                DetailAdapter.mContext.startActivity(intent);
+            switch (type) {
+                case TRAILER:
+                    URL clickURL = (URL) DetailAdapter.trailerMap.values().toArray()[getAdapterPosition() - trailerOffsetInd];
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(clickURL.toString()));
+                    DetailAdapter.mContext.startActivity(intent);
+                    break;
+                case REVIEW:
+                    mShowReviewDetails = !mShowReviewDetails;
+                    if (mShowReviewDetails) {
+                        review.setMaxLines(Integer.MAX_VALUE);
+                        review.setEllipsize(null);
+                        expandImage.setImageResource(R.drawable.ic_arrow_up);
+                    } else {
+                        review.setMaxLines(3);
+                        review.setEllipsize(TextUtils.TruncateAt.END);
+                        expandImage.setImageResource(R.drawable.ic_arrow_down);
+                    }
+                    break;
             }
         }
     }

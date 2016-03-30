@@ -36,6 +36,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private MenuItem favouriteItem;
     private boolean viewingFavourites;
     private Intent mShareIntent;
+    private MenuItem mShareItem;
 
     public DetailFragment() {
     }
@@ -67,8 +68,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.detail_menu, menu);
-
         favouriteItem = menu.findItem(R.id.menu_favourite);
+        mShareItem = menu.findItem(R.id.menu_share);
         setFavouriteIcon();
     }
 
@@ -126,21 +127,23 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private boolean checkFavourited() {
         if (mCursor != null) {
-            Cursor titleCursor = null;
-            try {
-                String title = mCursor.getString(Indices.title);
-                titleCursor = getContext().getContentResolver().query(
-                        MovieContract.FavouritesEntry.CONTENT_URI,
-                        new String[]{Columns.TITLE},
-                        Columns.TITLE + " = ?",
-                        new String[]{title},
-                        null);
-                if (titleCursor != null)
-                    return titleCursor.getCount() > 0;
-            } finally {
-                if (titleCursor != null) {
-                    if (!titleCursor.isClosed())
-                        titleCursor.close();
+            if(mCursor.moveToFirst()) {
+                Cursor titleCursor = null;
+                try {
+                    String title = mCursor.getString(Indices.title);
+                    titleCursor = getContext().getContentResolver().query(
+                            MovieContract.FavouritesEntry.CONTENT_URI,
+                            new String[]{Columns.TITLE},
+                            Columns.TITLE + " = ?",
+                            new String[]{title},
+                            null);
+                    if (titleCursor != null)
+                        return titleCursor.getCount() > 0;
+                } finally {
+                    if (titleCursor != null) {
+                        if (!titleCursor.isClosed())
+                            titleCursor.close();
+                    }
                 }
             }
         }
@@ -151,7 +154,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onPause() {
         if (favourited && !checkFavourited())
             addToFavourites();
-        else
+        else if(!favourited && checkFavourited())
             removeFromFavourites();
         super.onPause();
     }
@@ -208,7 +211,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             HashMap<String, URL> trailerMap = (HashMap<String, URL>) Serializer.deserialize(
                     mCursor.getBlob(Indices.trailers));
             if (trailerMap.values().size() > 0) {
-                String trailerName = (String) trailerMap.keySet().toArray()[0];
+//                String trailerName = (String) trailerMap.keySet().toArray()[0];
                 URL trailerUrl = (URL) trailerMap.values().toArray()[0];
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);

@@ -7,5 +7,5 @@
     android:layout_height="?attr/actionBarSize"
     android:background="@color/colorPrimary"
     android:theme="@style/ToolbarTheme"
-    app:popupTheme="@style/Theme.AppCompat.NoActionBar"
+    app:popupTheme="@style/ToolbarTheme"
     app:layout_scrollFlags="scroll|enterAlways"/>

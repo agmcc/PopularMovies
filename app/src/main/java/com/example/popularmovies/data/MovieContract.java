@@ -18,7 +18,6 @@ public class MovieContract {
         return ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd." + CONTENT_AUTHORITY + "." + path;
     }
 
-    //could replace individual buildpopularituri etc methods witj this
     public static Uri buildUri(Uri contentUri, long id) {
         return ContentUris.withAppendedId(contentUri, id);
     }
@@ -43,10 +42,6 @@ public class MovieContract {
         public static final String CONTENT_ITEM_TYPE = getContentItemType(PATH_POPULARITY);
 
         public static final String TABLE_NAME = "popularity";
-
-//        public static Uri buildPopularityUri(long id) {
-//            return ContentUris.withAppendedId(CONTENT_URI, id);
-//        }
     }
 
     public static final class RatingEntry implements BaseColumns {
@@ -59,10 +54,6 @@ public class MovieContract {
         public static final String CONTENT_ITEM_TYPE = getContentItemType(PATH_RATING);
 
         public static final String TABLE_NAME = "rating";
-
-//        public static Uri buildRatingUri(long id) {
-//            return ContentUris.withAppendedId(CONTENT_URI, id);
-//        }
     }
 
     public static final class FavouritesEntry implements BaseColumns {
@@ -75,10 +66,6 @@ public class MovieContract {
         public static final String CONTENT_ITEM_TYPE = getContentItemType(PATH_FAVOURITES);
 
         public static final String TABLE_NAME = "favourites";
-
-//        public static Uri buildFavouritesUri(long id) {
-//            return ContentUris.withAppendedId(CONTENT_URI, id);
-//        }
     }
 
 }

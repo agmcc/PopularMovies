@@ -6,5 +6,4 @@
     <color name="colorBackground">#ffffff</color>
     <color name="primaryText">#ffffff</color>
     <color name="primaryTextInverse">#000000</color>
-    <color name="overflowColor">#c6ff00</color>
 </resources>

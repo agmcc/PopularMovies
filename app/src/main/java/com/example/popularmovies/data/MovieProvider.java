@@ -157,7 +157,6 @@ public class MovieProvider extends ContentProvider {
             case POPULARITY: {
                 newRowId = db.insert(PopularityEntry.TABLE_NAME, null, values);
                 if (newRowId > 0)
-//                    returnUri = PopularityEntry.buildPopularityUri(newRowId);
                     returnUri = MovieContract.buildUri(PopularityEntry.CONTENT_URI, newRowId);
                 else
                     throw new android.database.SQLException("Failed to insert row into: " + uri);
@@ -166,7 +165,6 @@ public class MovieProvider extends ContentProvider {
             case RATING: {
                 newRowId = db.insert(RatingEntry.TABLE_NAME, null, values);
                 if (newRowId > 0)
-//                    returnUri = RatingEntry.buildRatingUri(newRowId);
                     returnUri = MovieContract.buildUri(RatingEntry.CONTENT_URI, newRowId);
                 else
                     throw new android.database.SQLException("Failed to insert row into: " + uri);
@@ -175,7 +173,6 @@ public class MovieProvider extends ContentProvider {
             case FAVOURITES: {
                 newRowId = db.insert(FavouritesEntry.TABLE_NAME, null, values);
                 if (newRowId > 0)
-//                    returnUri = FavouritesEntry.buildFavouritesUri(newRowId);
                     returnUri = MovieContract.buildUri(FavouritesEntry.CONTENT_URI, newRowId);
                 else
                     throw new android.database.SQLException("Failed to insert row into: " + uri);
