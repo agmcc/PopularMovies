@@ -36,50 +36,15 @@ import java.util.Vector;
 
 public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
-    /*
-    Goal - sync with Api and write data to content provider
-    Api calls -
-    1) Discover, sorted by popualarity new api: /movie/popular
-    2) Discover, sorted by rating : /movie/top_rated
-    3) Trailers call - /movie/id/videos
-    3) Reviews call /movie/id/reviews
-
-    N.B. id can be fetched from popular or top rated calls e.g. 293660 (deadpool)
-    example trailer json: {"id":293660,"results":[{"id":"56c4cb4bc3a3680d57000560","iso_639_1":"en","iso_3166_1":"US","key":"7jIBCiYg58k","name":"Trailer","site":"YouTube","size":1080,"type":"Trailer"}]}
-    contains results array with id, key, name, site and others
-    Deadpool key = 7jIBCiYg58k
-    get youtube url: https://www.youtube.com/watch?v=   +   key
-    e.g. https://www.youtube.com/watch?v=7jIBCiYg58k
-
-    http://http//api.themoviedb.org/3/movie/now_playing?api_key=2e19e8fc023dd86dee79eb6b406fcd43
-
-    step 1(String sortMode) - will call /movie/sortmode and return json and parse (inc. id)
-    step 2 for each movie id call movie/id/trailer
-    step 3 for each movie id call movie/id/reviews
-    step 4 bulkinsert popularity, trailers and revies into popualrity table and popualr, trailers and reviews into popular table
-
-        e.g getMovieData(popularity); > calls GetTrailers(list id), GetReviews(list id), insertvalues(popularity)
-        getMovieData(rating);calls GetTrailers(list id), GetReviews(list id), insertvalues(rating)
-
-        will start by using just popualrity and rating tables and only adding 1 trailer and 1 review each
-        later worry about foreign keys / shared trailer tables etc.
-        //review: http://api.themoviedb.org/3/movie/293660/reviews?api_key=2e19e8fc023dd86dee79eb6b406fcd43
-        results json: results array, id author content url objects - want author and content
-     */
     public static final String LOG_TAG = MovieSyncAdapter.class.getSimpleName();
-
-    //// TODO: 12/03/2016 settings menu with sync frequency
-    public static final int SYNC_INTERVAL = 60 * 180; //seconds
+    public static final int SYNC_INTERVAL = 60 * 180;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
-//    private static final String POPULAR = "popular";
-//    private static final String RATING = "top_rated";
 
     public MovieSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
     }
 
     public static void configurePeriodicSync(Context context, int syncInterval, int flexTime) {
-//        Log.v(LOG_TAG, "configurePeriodicSync");
         Account account = getSyncAccount(context);
         String authority = context.getString(R.string.content_authority);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -95,7 +60,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     public static void syncImmediately(Context context) {
-//        Log.v(LOG_TAG, "syncImmediately");
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
@@ -104,8 +68,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     public static Account getSyncAccount(Context context) {
-
-//        Log.v(LOG_TAG, "getSyncAccount");
         AccountManager accountManager =
                 (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
 
@@ -121,14 +83,12 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private static void onAccountCreated(Account newAccount, Context context) {
-//        Log.v(LOG_TAG, "onAccountCreated");
         MovieSyncAdapter.configurePeriodicSync(context, SYNC_INTERVAL, SYNC_FLEXTIME);
         ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.content_authority), true);
         syncImmediately(context);
     }
 
     public static void initializeSyncAdapter(Context context) {
-//        Log.v(LOG_TAG, "initializeSyncAdapter");
         getSyncAccount(context);
     }
 
@@ -138,10 +98,8 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         String sortMode = null;
 
         if (contentUri.equals(MovieContract.PopularityEntry.CONTENT_URI)) {
-//            Log.v(LOG_TAG, "Sorting by popularity");
             sortMode = API_SORT_POPULARITY;
         } else if (contentUri.equals(MovieContract.RatingEntry.CONTENT_URI)) {
-//            Log.v(LOG_TAG, "Sorting by rating");
             sortMode = API_SORT_RATING;
         } else
             throw new UnsupportedOperationException("Unknown sortMode: " + sortMode);
@@ -165,7 +123,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
         String moviesJsonStr = getJSONStr(movieUrl);
-        //todo check parseMovieJson and linked methods - ok up to here
         if (moviesJsonStr != null)
             parseMovieJSON(moviesJsonStr, contentUri);
         else
@@ -176,70 +133,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         getMovieData(PopularityEntry.CONTENT_URI);
         getMovieData(RatingEntry.CONTENT_URI);
-//      Log.d(LOG_TAG, "onPerformSync");
-//
-//        HttpURLConnection urlConnection = null;
-//        BufferedReader reader = null;
-//        String moviesJsonStr;
-//
-//        try {
-//            final String MOVIE_DB_BASE_URL = "http://api.themoviedb.org/3/discover";
-//            final String CONTENT_TYPE = "movie";
-//            final String SORT_PARAM = "sort_by";
-//            final String API_KEY_PARAM = "api_key";
-//
-//            Uri builtUri = Uri.parse(MOVIE_DB_BASE_URL).buildUpon()
-//                    .appendEncodedPath(CONTENT_TYPE)
-//                            //temp- will need diff functions for popualrity, rating etc.
-//                    .appendQueryParameter(SORT_PARAM, "popularity.desc")
-//                    .appendQueryParameter(API_KEY_PARAM, BuildConfig.THE_MOVIE_DB_API_KEY)
-//                    .build();
-//
-//            URL url = new URL(builtUri.toString());
-//            Log.v(LOG_TAG, "Built URI " + builtUri.toString());
-//            //http://api.themoviedb.org/3/movie/now_playing?api_key=2e19e8fc023dd86dee79eb6b406fcd43
-//
-//            urlConnection = (HttpURLConnection) url.openConnection();
-//            urlConnection.setRequestMethod("GET");
-//            urlConnection.connect();
-//
-//            InputStream inputStream = urlConnection.getInputStream();
-//            StringBuffer buffer = new StringBuffer();
-//
-//            if (inputStream == null)
-//                return;
-//
-//            reader = new BufferedReader(new InputStreamReader(inputStream));
-//
-//            String line;
-//            while ((line = reader.readLine()) != null) {
-//                buffer.append(line + "\n");
-//            }
-//
-//            if (buffer.length() == 0)
-//                return;
-//
-//            moviesJsonStr = buffer.toString();
-//            getMovieDataFromJSON(moviesJsonStr);
-//            Log.v(LOG_TAG, "Movies JSON String: " + moviesJsonStr);
-//
-//        } catch (IOException e) {
-//            Log.e(LOG_TAG, "Error ", e);
-//        } catch (JSONException e) {
-//            Log.e(LOG_TAG, e.getMessage(), e);
-//            e.printStackTrace();
-//        } finally {
-//            if (urlConnection != null) {
-//                urlConnection.disconnect();
-//            }
-//            if (reader != null) {
-//                try {
-//                    reader.close();
-//                } catch (final IOException e) {
-//                    Log.e(LOG_TAG, "Error closing stream", e);
-//                }
-//            }
-//        }
     }
 
     private String getJSONStr(URL url) {
@@ -269,8 +162,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 return null;
 
             jsonStr = buffer.toString();
-//            Log.v(LOG_TAG, "JSON String: " + jsonStr);
-//            return jsonStr;
 
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error", e);
@@ -335,7 +226,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 final String API_TRAILER = "videos";
                 final String API_KEY_PARAM = "api_key";
 
-//                URL trailerUrl;
                 Uri trailerUri = Uri.parse(MOVIE_DB_BASE_URL).buildUpon()
                         .appendEncodedPath(CONTENT_TYPE)
                         .appendEncodedPath(id)
@@ -391,7 +281,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             JSONArray trailerDataArray = trailerDataJson.getJSONArray(MOVIE_DB_RESULTS);
 
             int numTrailers = trailerDataArray.length();
-            //listedhashmap? or other type
+
             HashMap<String, URL> trailerMap = new HashMap<>();
 
             for (int i = 0; i < numTrailers; i++) {
@@ -418,36 +308,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         return null;
     }
 
-//    private <K, V> byte[] parseArrayToMap(String jsonStr, final String MOVIE_DB_KEY, final String MOVIE_DB_VALUE) {
-//
-//        final String MOVIE_DB_RESULTS = "results";
-//
-//        try {
-//            JSONObject jsonObj = new JSONObject(jsonStr);
-//            JSONArray dataArray = jsonObj.getJSONArray(MOVIE_DB_RESULTS);
-//
-//            int numEntries = dataArray.length();
-//
-//            HashMap<String, String> reviewMap = new HashMap<>();
-//
-//            for (int i = 0; i < numEntries; i++) {
-//                JSONObject entryObj = dataArray.getJSONObject(i);
-//
-//                K key = entryObj.getString(MOVIE_DB_KEY);
-//                String author = reviewObject.getString(MOVIE_DB_AUTHOR);
-//                String content = reviewObject.getString(MOVIE_DB_CONTENT);
-//
-//                reviewMap.put(author, content);
-//            }
-//            return Serializer.serialize(reviewMap);
-//        } catch (JSONException e) {
-//            Log.e(LOG_TAG, e.getMessage());
-//        }
-//
-//        return null;
-//    }
-
-    //these methods are nearly identical - could have a "parseMap<Type,Type>(String key, String value)
     private byte[] parseReviewJSON(String reviewJsonStr) {
         final String MOVIE_DB_RESULTS = "results";
         final String MOVIE_DB_AUTHOR = "author";
@@ -458,7 +318,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             JSONArray reviewDataArray = reviewDataJson.getJSONArray(MOVIE_DB_RESULTS);
 
             int numReviews = reviewDataArray.length();
-            //listedhashmap? or other type
+
             HashMap<String, String> reviewMap = new HashMap<>();
 
             for (int i = 0; i < numReviews; i++) {
@@ -476,78 +336,4 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         return null;
     }
 
-
-//    private void getMovieDataFromJSON(String movieDataJsonStr) throws JSONException {
-//
-//        final String MOVIE_DB_RESULTS = "results";
-//        final String MOVIE_DB_POSTER = "poster_path";
-//        final String MOVIE_DB_OVERVIEW = "overview";
-//        final String MOVIE_DB_DATE = "release_date";
-//        final String MOVIE_DB_TITLE = "title";
-//        final String MOVIE_DB_VOTE = "vote_average";
-//
-//        final String POSTER_BASE_URL = "https://image.tmdb.org/t/p";
-//        final String POSTER_THUMB_SIZE = "w185";
-//        final String POSTER_FULL_SIZE = "w780";
-//
-//        try {
-//            JSONObject movieDataJson = new JSONObject(movieDataJsonStr);
-//            JSONArray movieDataArray = movieDataJson.getJSONArray(MOVIE_DB_RESULTS);
-//
-//            int numMovies = movieDataArray.length();
-//
-//            Vector<ContentValues> cVVector = new Vector<ContentValues>(movieDataArray.length());
-//
-//            for (int i = 0; i < numMovies; i++) {
-//                JSONObject movieObject = movieDataArray.getJSONObject(i);
-//
-//                String poster_thumb = Uri.parse(POSTER_BASE_URL).buildUpon()
-//                        .appendEncodedPath(POSTER_THUMB_SIZE)
-//                        .appendEncodedPath(movieObject.getString(MOVIE_DB_POSTER))
-//                        .build()
-//                        .toString();
-//
-//                String poster_full = Uri.parse(POSTER_BASE_URL).buildUpon()
-//                        .appendEncodedPath(POSTER_FULL_SIZE)
-//                        .appendEncodedPath(movieObject.getString(MOVIE_DB_POSTER))
-//                        .build()
-//                        .toString();
-//
-//                String summary = movieObject.getString(MOVIE_DB_OVERVIEW);
-//                String date = movieObject.getString(MOVIE_DB_DATE);
-//                String title = movieObject.getString(MOVIE_DB_TITLE);
-//                String rating = movieObject.getString(MOVIE_DB_VOTE);
-//                //todo parse trailer and review- will do separatey
-//
-//                //todo add to different db based on spinner (popular, rating)
-//                //todo add first trailer and review (test)
-//
-//                ContentValues movieValues = new ContentValues();
-//
-//                movieValues.put(MovieContract.Columns.POSTER, poster_thumb);
-//                movieValues.put(MovieContract.Columns.POSTER_FULL, poster_full);
-//                movieValues.put(MovieContract.Columns.SUMMARY, summary);
-//                movieValues.put(MovieContract.Columns.DATE, date);
-//                movieValues.put(MovieContract.Columns.TITLE, title);
-//                movieValues.put(MovieContract.Columns.RATING, rating);
-////                movieValues.put(Columns.TRAILERS, trailer);
-//                //movieValues.put(Columns.REVIEWS, review);
-//
-//                cVVector.add(movieValues);
-//            }
-//
-//            //n.b. this is where would decide which db (rating, popular) to put cvs into
-//            if (cVVector.size() > 0) {
-//                ContentValues[] cvArray = new ContentValues[cVVector.size()];
-//                cVVector.toArray(cvArray);
-//                ContentResolver resolver = getContext().getContentResolver();
-//                resolver.delete(MovieContract.PopularityEntry.CONTENT_URI, null, null);
-//                resolver.delete(MovieContract.RatingEntry.CONTENT_URI, null, null);
-//                resolver.bulkInsert(MovieContract.PopularityEntry.CONTENT_URI, cvArray);
-//            }
-//        } catch (JSONException e) {
-//            Log.e(LOG_TAG, e.getMessage(), e);
-//            e.printStackTrace();
-//        }
-//    }
 }
